@@ -48,6 +48,7 @@ export default function NewMeetingPage() {
   const [transcript, setTranscript] = useState(DEFAULT_TRANSCRIPT);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
 
   const words = wordCount(transcript);
   const minutes = readTimeMinutes(transcript);
@@ -196,8 +197,8 @@ export default function NewMeetingPage() {
                 onClick={() => setMode("paste")}
                 className={
                   mode === "paste"
-                    ? "flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface rounded font-label-md text-label-md font-semibold shadow-sm transition-all"
-                    : "flex items-center gap-space-xs px-space-md py-space-xs text-on-surface-variant hover:text-on-surface rounded font-label-md text-label-md font-medium transition-all"
+                    ? "flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface rounded font-label-md text-label-md font-semibold shadow-sm active:scale-[0.97] transition-all"
+                    : "flex items-center gap-space-xs px-space-md py-space-xs text-on-surface-variant hover:text-on-surface rounded font-label-md text-label-md font-medium active:scale-[0.97] transition-all"
                 }
               >
                 <Icon name="text_fields" className="text-base" />
@@ -207,8 +208,8 @@ export default function NewMeetingPage() {
                 onClick={() => setMode("upload")}
                 className={
                   mode === "upload"
-                    ? "flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface rounded font-label-md text-label-md font-semibold shadow-sm transition-all"
-                    : "flex items-center gap-space-xs px-space-md py-space-xs text-on-surface-variant hover:text-on-surface rounded font-label-md text-label-md font-medium transition-all"
+                    ? "flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface rounded font-label-md text-label-md font-semibold shadow-sm active:scale-[0.97] transition-all"
+                    : "flex items-center gap-space-xs px-space-md py-space-xs text-on-surface-variant hover:text-on-surface rounded font-label-md text-label-md font-medium active:scale-[0.97] transition-all"
                 }
               >
                 <Icon name="upload_file" className="text-base" />
@@ -242,9 +243,29 @@ export default function NewMeetingPage() {
             </div>
           ) : (
             <div className="flex min-h-[380px] items-center justify-center p-space-xl">
-              <label className="flex flex-col items-center gap-space-sm border-2 border-dashed border-outline-variant rounded-xl px-space-2xl py-space-xl cursor-pointer hover:border-primary hover:bg-surface-container-low transition-colors text-center">
-                <Icon name="cloud_upload" className="text-4xl text-outline" />
-                <span className="font-headline-sm text-headline-sm text-on-surface">Drop a .vtt, .txt, .m4a or .mp3 file</span>
+              <label
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  setDragActive(true);
+                }}
+                onDragLeave={() => setDragActive(false)}
+                onDrop={async (e) => {
+                  e.preventDefault();
+                  setDragActive(false);
+                  const file = e.dataTransfer.files?.[0];
+                  if (!file) return;
+                  const text = await file.text();
+                  setTranscript(text);
+                  setMode("paste");
+                }}
+                className={`flex flex-col items-center gap-space-sm border-2 border-dashed rounded-xl px-space-2xl py-space-xl cursor-pointer transition-all text-center ${
+                  dragActive ? "border-primary bg-surface-container-low scale-[1.01]" : "border-outline-variant hover:border-primary hover:bg-surface-container-low"
+                }`}
+              >
+                <Icon name="cloud_upload" className={`text-4xl ${dragActive ? "text-primary" : "text-outline"}`} />
+                <span className="font-headline-sm text-headline-sm text-on-surface">
+                  {dragActive ? "Drop to load transcript" : "Drop a .vtt, .txt, .m4a or .mp3 file"}
+                </span>
                 <span className="font-body-sm text-body-sm text-on-surface-variant">Audio/VTT auto-transcription is not wired in this demo — paste text instead.</span>
                 <input
                   type="file"

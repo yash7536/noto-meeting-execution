@@ -33,6 +33,7 @@ export default function ExportWorkspacePage() {
   const items = useMemo(() => allItems.filter((i) => i.meetingId === params.id), [allItems, params.id]);
   const [tab, setTab] = useState<Tab>("jira");
   const [toast, setToast] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   const approved = useMemo(() => items.filter((i) => i.status === "approved"), [items]);
   const jiraItems = useMemo(() => approved.filter((i) => i.type === "action" || i.type === "risk"), [approved]);
@@ -42,13 +43,17 @@ export default function ExportWorkspacePage() {
     setTimeout(() => setToast(null), 2400);
   }
 
-  async function copy(text: string, msg: string) {
+  async function copy(text: string, msg: string, key?: string) {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
       /* ignore — still confirm content was generated */
     }
     showToast(msg);
+    if (key) {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1600);
+    }
   }
 
   if (!meeting) {
@@ -132,8 +137,8 @@ export default function ExportWorkspacePage() {
               onClick={() => setTab(t.key)}
               className={
                 tab === t.key
-                  ? "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs transition-all bg-surface-container-lowest text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06)] font-headline-sm text-headline-sm"
-                  : "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs transition-all text-on-surface-variant hover:text-on-surface font-headline-sm text-headline-sm"
+                  ? "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-all bg-surface-container-lowest text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06)] font-headline-sm text-headline-sm"
+                  : "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-all text-on-surface-variant hover:text-on-surface font-headline-sm text-headline-sm"
               }
             >
               <Icon name={t.icon} className="text-secondary text-base" />
@@ -144,7 +149,7 @@ export default function ExportWorkspacePage() {
         </div>
 
         {tab === "jira" && (
-          <div className="flex flex-col gap-space-xl">
+          <div className="flex flex-col gap-space-xl animate-fade-in">
             <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col xl:flex-row xl:items-center justify-between gap-space-lg">
               <div className="flex flex-wrap items-center gap-space-lg">
                 <div className="flex items-center gap-space-sm">
@@ -161,18 +166,22 @@ export default function ExportWorkspacePage() {
               </div>
               <div className="flex flex-wrap items-center gap-space-sm">
                 <button
-                  onClick={() => copy(jiraItems.map(jiraTicketMarkup).join("\n\n---\n\n"), `All ${jiraItems.length} Jira issues copied to clipboard.`)}
-                  className="px-space-md py-space-sm bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-sm hover:bg-primary-container transition-colors flex items-center gap-space-xs"
+                  onClick={() => copy(jiraItems.map(jiraTicketMarkup).join("\n\n---\n\n"), `All ${jiraItems.length} Jira issues copied to clipboard.`, "jira-all")}
+                  className={`px-space-md py-space-sm rounded-lg shadow-sm active:scale-[0.97] transition-all flex items-center gap-space-xs ${
+                    copiedKey === "jira-all" ? "bg-tertiary-container text-on-tertiary-container" : "bg-primary text-on-primary hover:bg-primary-container"
+                  }`}
                 >
-                  <Icon name="content_copy" className="text-base" />
-                  <span>Copy All Jira Tickets</span>
+                  <Icon name={copiedKey === "jira-all" ? "check" : "content_copy"} className="text-base" />
+                  <span>{copiedKey === "jira-all" ? "Copied!" : "Copy All Jira Tickets"}</span>
                 </button>
                 <button
-                  onClick={() => copy(buildCsv(jiraItems), "execution_plan.csv copied to clipboard.")}
-                  className="px-space-md py-space-sm bg-surface-container text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-variant transition-colors flex items-center gap-space-xs"
+                  onClick={() => copy(buildCsv(jiraItems), "execution_plan.csv copied to clipboard.", "jira-csv")}
+                  className={`px-space-md py-space-sm rounded-lg active:scale-[0.97] transition-all flex items-center gap-space-xs ${
+                    copiedKey === "jira-csv" ? "bg-tertiary-container text-on-tertiary-container" : "bg-surface-container text-on-surface hover:bg-surface-variant"
+                  }`}
                 >
-                  <Icon name="download" className="text-base" />
-                  <span>Copy .CSV for Jira Importer</span>
+                  <Icon name={copiedKey === "jira-csv" ? "check" : "download"} className="text-base" />
+                  <span>{copiedKey === "jira-csv" ? "Copied!" : "Copy .CSV for Jira Importer"}</span>
                 </button>
               </div>
             </div>
@@ -196,11 +205,13 @@ export default function ExportWorkspacePage() {
                       </span>
                     </div>
                     <button
-                      onClick={() => copy(jiraTicketMarkup(item), `[${jiraStubId(idx)}] copied to clipboard.`)}
-                      className="self-start sm:self-auto px-space-sm py-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container font-label-sm text-label-sm rounded-lg flex items-center gap-space-xs transition-colors shadow-sm"
+                      onClick={() => copy(jiraTicketMarkup(item), `[${jiraStubId(idx)}] copied to clipboard.`, `jira-${item.id}`)}
+                      className={`self-start sm:self-auto px-space-sm py-space-xs font-label-sm text-label-sm rounded-lg flex items-center gap-space-xs active:scale-[0.96] transition-all shadow-sm ${
+                        copiedKey === `jira-${item.id}` ? "bg-tertiary-container text-on-tertiary-container" : "bg-surface-container-lowest text-on-surface hover:bg-surface-container"
+                      }`}
                     >
-                      <Icon name="content_copy" className="text-sm" />
-                      <span>Copy This Ticket</span>
+                      <Icon name={copiedKey === `jira-${item.id}` ? "check" : "content_copy"} className="text-sm" />
+                      <span>{copiedKey === `jira-${item.id}` ? "Copied!" : "Copy This Ticket"}</span>
                     </button>
                   </div>
                   <div className="flex flex-col gap-space-2xs">
@@ -240,12 +251,17 @@ export default function ExportWorkspacePage() {
         )}
 
         {tab === "markdown" && (
-          <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+          <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md animate-fade-in">
             <div className="flex items-center justify-between">
               <span className="font-headline-sm text-headline-sm text-on-surface">Standard Markdown Format</span>
-              <button onClick={() => copy(markdown, "Markdown plan copied to clipboard.")} className="px-space-md py-space-xs bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs">
-                <Icon name="content_copy" className="text-base" />
-                <span>Copy Markdown</span>
+              <button
+                onClick={() => copy(markdown, "Markdown plan copied to clipboard.", "markdown")}
+                className={`px-space-md py-space-xs rounded-lg font-label-md text-label-md flex items-center gap-space-xs active:scale-[0.97] transition-all ${
+                  copiedKey === "markdown" ? "bg-tertiary-container text-on-tertiary-container" : "bg-primary text-on-primary"
+                }`}
+              >
+                <Icon name={copiedKey === "markdown" ? "check" : "content_copy"} className="text-base" />
+                <span>{copiedKey === "markdown" ? "Copied!" : "Copy Markdown"}</span>
               </button>
             </div>
             <pre className="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-mono-code text-mono-code overflow-x-auto leading-relaxed whitespace-pre-wrap">{markdown}</pre>
@@ -253,12 +269,17 @@ export default function ExportWorkspacePage() {
         )}
 
         {tab === "json" && (
-          <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md">
+          <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm flex flex-col gap-space-md animate-fade-in">
             <div className="flex items-center justify-between">
               <span className="font-headline-sm text-headline-sm text-on-surface">Structured JSON Schema (RFC 8259)</span>
-              <button onClick={() => copy(json, "RFC 8259 JSON payload copied to clipboard.")} className="px-space-md py-space-xs bg-primary text-on-primary rounded-lg font-label-md text-label-md flex items-center gap-space-xs">
-                <Icon name="content_copy" className="text-base" />
-                <span>Copy JSON Payload</span>
+              <button
+                onClick={() => copy(json, "RFC 8259 JSON payload copied to clipboard.", "json")}
+                className={`px-space-md py-space-xs rounded-lg font-label-md text-label-md flex items-center gap-space-xs active:scale-[0.97] transition-all ${
+                  copiedKey === "json" ? "bg-tertiary-container text-on-tertiary-container" : "bg-primary text-on-primary"
+                }`}
+              >
+                <Icon name={copiedKey === "json" ? "check" : "content_copy"} className="text-base" />
+                <span>{copiedKey === "json" ? "Copied!" : "Copy JSON Payload"}</span>
               </button>
             </div>
             <pre className="bg-inverse-surface text-inverse-on-surface p-space-md rounded-lg font-mono-code text-mono-code overflow-x-auto leading-relaxed whitespace-pre-wrap">{json}</pre>
@@ -266,7 +287,7 @@ export default function ExportWorkspacePage() {
         )}
 
         {tab === "notion" && (
-          <div className="flex flex-col gap-space-md">
+          <div className="flex flex-col gap-space-md animate-fade-in">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
               <div className="flex items-center gap-space-sm">
                 <div className="p-space-2xs bg-surface-container rounded">
@@ -278,11 +299,13 @@ export default function ExportWorkspacePage() {
                 </div>
               </div>
               <button
-                onClick={() => copy(notionTsv, "Notion database table copied as tab-separated values.")}
-                className="px-space-md py-space-sm bg-surface-container text-on-surface hover:bg-surface-variant font-label-md text-label-md rounded-lg flex items-center gap-space-xs transition-colors shadow-sm self-start sm:self-auto"
+                onClick={() => copy(notionTsv, "Notion database table copied as tab-separated values.", "notion-tsv")}
+                className={`px-space-md py-space-sm rounded-lg flex items-center gap-space-xs active:scale-[0.97] transition-all shadow-sm self-start sm:self-auto ${
+                  copiedKey === "notion-tsv" ? "bg-tertiary-container text-on-tertiary-container" : "bg-surface-container text-on-surface hover:bg-surface-variant"
+                }`}
               >
-                <Icon name="copy_all" className="text-base" />
-                <span>Copy Notion Table (TSV)</span>
+                <Icon name={copiedKey === "notion-tsv" ? "check" : "copy_all"} className="text-base" />
+                <span>{copiedKey === "notion-tsv" ? "Copied!" : "Copy Notion Table (TSV)"}</span>
               </button>
             </div>
             <div className="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">

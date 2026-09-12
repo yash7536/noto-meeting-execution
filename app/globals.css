@@ -225,3 +225,80 @@
 .animate-fade-in {
   animation: fade-in 200ms ease-out;
 }
+
+/* Reverse of the two animations above, used when a drawer/modal is
+   dismissed so it closes with the same polish it opened with instead of
+   vanishing instantly. */
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+.animate-fade-out {
+  animation: fade-out 160ms ease-in forwards;
+}
+
+@keyframes slide-out-to-right {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+.animate-drawer-out {
+  animation: slide-out-to-right 180ms cubic-bezier(0.4, 0, 1, 1) forwards;
+}
+
+/* Toast stack enter animation — a small upward slide + fade reads as
+   "arriving" without the exaggerated bounce/spring motion we want to avoid. */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+.animate-toast-in {
+  animation: toast-in 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Small one-shot pop used for success checkmarks / state confirmations. */
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-pop-in {
+  animation: pop-in 220ms ease-out;
+}
+
+/* Respect the user's OS-level reduced-motion preference: collapse every
+   animation and transition (custom keyframes above, plus Tailwind's own
+   transition, animate-pulse, animate-ping and animate-spin utilities) down
+   to effectively instant, rather than disabling motion piecemeal per element. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

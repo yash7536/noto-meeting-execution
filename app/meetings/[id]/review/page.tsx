@@ -8,6 +8,7 @@ import { Icon } from "@/components/Icon";
 import { ItemCard } from "@/components/ItemCard";
 import { EditDrawer } from "@/components/EditDrawer";
 import { useCopilotStore, itemCounts } from "@/lib/store";
+import { showToast } from "@/lib/toast";
 import { formatShortDate } from "@/lib/format";
 import type { ExecutionItem, ItemType } from "@/lib/types";
 
@@ -117,14 +118,21 @@ export default function ReviewWorkspacePage() {
           <div className="flex items-center flex-wrap gap-space-sm">
             <button
               onClick={() => setSplitView((v) => !v)}
-              className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors rounded-lg font-label-md text-label-md shadow-sm"
+              className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container-low active:scale-[0.97] transition-all rounded-lg font-label-md text-label-md shadow-sm"
             >
               <Icon name="splitscreen" className="text-base text-secondary" />
               <span>Transcript Split View</span>
             </button>
             <button
-              onClick={() => alert("Read-only review link copied to clipboard.")}
-              className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container-low transition-colors rounded-lg font-label-md text-label-md shadow-sm"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(window.location.href);
+                } catch {
+                  /* clipboard may be unavailable — still confirm the link is generated */
+                }
+                showToast("Read-only review link copied to clipboard.", { icon: "link" });
+              }}
+              className="flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest text-on-surface hover:bg-surface-container-low active:scale-[0.97] transition-all rounded-lg font-label-md text-label-md shadow-sm"
             >
               <Icon name="share" className="text-base text-outline" />
               <span>Share Review Link</span>
@@ -133,9 +141,10 @@ export default function ReviewWorkspacePage() {
               disabled={readyCount === 0}
               onClick={() => {
                 approveAllReady(meeting.id);
+                showToast(`${readyCount} item${readyCount === 1 ? "" : "s"} approved`, { icon: "task_alt" });
                 router.push(`/meetings/${meeting.id}/export`);
               }}
-              className="flex items-center gap-space-sm px-space-lg py-space-xs bg-primary text-on-primary hover:bg-primary-container transition-all rounded-lg font-label-md text-label-md shadow-md disabled:opacity-50"
+              className="flex items-center gap-space-sm px-space-lg py-space-xs bg-primary text-on-primary hover:bg-primary-container active:scale-[0.97] transition-all rounded-lg font-label-md text-label-md shadow-md disabled:opacity-50"
             >
               <span className="font-semibold">Approve All &amp; Export</span>
               <span className="px-space-xs py-space-2xs bg-primary-fixed-dim text-on-primary-fixed font-mono-metric text-mono-metric rounded">{readyCount} ready</span>
@@ -219,8 +228,8 @@ export default function ReviewWorkspacePage() {
                 onClick={() => setFilter(tab.key)}
                 className={
                   filter === tab.key
-                    ? "px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm font-semibold flex items-center gap-space-xs whitespace-nowrap"
-                    : "px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors whitespace-nowrap"
+                    ? "px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm font-semibold flex items-center gap-space-xs whitespace-nowrap active:scale-[0.97] transition-all"
+                    : "px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface active:scale-[0.97] transition-all whitespace-nowrap"
                 }
               >
                 <span>
@@ -233,7 +242,7 @@ export default function ReviewWorkspacePage() {
 
         {/* Core Review Workspace: Two-Column Split */}
         <div className={`grid grid-cols-1 ${splitView ? "lg:grid-cols-12" : ""} gap-space-lg items-start`}>
-          <div className={splitView ? "lg:col-span-7 flex flex-col gap-space-base" : "flex flex-col gap-space-base"}>
+          <div key={filter} className={splitView ? "lg:col-span-7 flex flex-col gap-space-base animate-fade-in" : "flex flex-col gap-space-base animate-fade-in"}>
             {filteredItems.length === 0 && (
               <div className="bg-surface-container-lowest rounded-xl p-space-xl text-center text-on-surface-variant font-body-md text-body-md shadow-sm">
                 Nothing in this filter right now.
@@ -340,7 +349,7 @@ function TelemetryCard({
   return (
     <button
       onClick={onClick}
-      className={`text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between transition-colors group ${
+      className={`text-left bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between active:scale-[0.98] transition-all group ${
         active ? "ring-2 ring-primary/40" : "hover:bg-surface-container-low"
       }`}
     >

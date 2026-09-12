@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import { Icon } from "./Icon";
 import { Logo } from "./Logo";
+import { ToastHost } from "./ToastHost";
 import { hydrateStore } from "@/lib/store";
 
 const NAV = [
@@ -45,7 +46,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <Link
               href="/new-meeting"
-              className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-primary-container transition-colors"
+              className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary font-label-md text-label-md rounded-lg shadow-[0_1px_2px_rgba(0,0,0,0.04)] hover:bg-primary-container active:scale-[0.97] transition-all"
             >
               <Icon name="add" className="text-base" />
               <span>New Meeting</span>
@@ -71,8 +72,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                   aria-current={active ? "page" : undefined}
                   className={
                     active
-                      ? "flex items-center px-space-md py-space-sm rounded-lg transition-colors bg-primary-container text-on-primary-container font-semibold font-label-md text-label-md"
-                      : "flex items-center px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors font-label-md text-label-md"
+                      ? "flex items-center px-space-md py-space-sm rounded-lg transition-all active:scale-[0.98] bg-primary-container text-on-primary-container font-semibold font-label-md text-label-md"
+                      : "flex items-center px-space-md py-space-sm rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface hover:translate-x-0.5 active:scale-[0.98] transition-all font-label-md text-label-md"
                   }
                 >
                   {item.label}
@@ -86,6 +87,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <div className="pl-64">
         <main className="relative pt-16 w-full min-h-screen bg-surface">{children}</main>
       </div>
+
+      <ToastHost />
     </>
   );
 }

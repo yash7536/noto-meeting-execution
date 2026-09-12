@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { useCopilotStore, itemCounts } from "@/lib/store";
+import { showToast } from "@/lib/toast";
 import { formatLongDate } from "@/lib/format";
 
 export default function ApprovedPlanPage() {
@@ -49,7 +50,7 @@ export default function ApprovedPlanPage() {
               : `${approved.length} of ${items.length} items are approved. Approving the plan locks it as the authoritative record.`}
           </p>
           <div className="flex items-center gap-space-sm">
-            <Link href={`/meetings/${meeting.id}/review`} className="px-space-lg py-space-sm bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg shadow-sm transition-colors">
+            <Link href={`/meetings/${meeting.id}/review`} className="px-space-lg py-space-sm bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg shadow-sm active:scale-[0.97] transition-all">
               Open Review Workspace
             </Link>
             <button
@@ -57,8 +58,9 @@ export default function ApprovedPlanPage() {
               onClick={() => {
                 approveMeetingPlan(meeting.id, "Yash");
                 setMeetingStatus(meeting.id, "approved");
+                showToast("Plan approved and locked", { icon: "lock" });
               }}
-              className="px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg shadow-sm transition-colors disabled:opacity-40"
+              className="px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded-lg shadow-sm active:scale-[0.97] transition-all disabled:opacity-40"
             >
               Approve &amp; Lock Plan
             </button>
@@ -133,20 +135,24 @@ export default function ApprovedPlanPage() {
               </div>
               <div className="flex items-center flex-wrap gap-space-xs shrink-0">
                 <button
-                  onClick={() => {
-                    navigator.clipboard?.writeText(window.location.href);
-                    alert("Read-only execution link copied to clipboard.");
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(window.location.href);
+                    } catch {
+                      /* clipboard may be unavailable — still confirm the link is generated */
+                    }
+                    showToast("Read-only execution link copied to clipboard.", { icon: "link" });
                   }}
-                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg transition-colors shadow-sm"
+                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg active:scale-[0.97] transition-all shadow-sm"
                 >
                   <Icon name="link" className="text-base text-secondary" />
                   <span>Share Read-Only</span>
                 </button>
-                <button onClick={() => window.print()} className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg transition-colors shadow-sm">
+                <button onClick={() => window.print()} className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container text-on-surface font-label-md text-label-md rounded-lg active:scale-[0.97] transition-all shadow-sm">
                   <Icon name="picture_as_pdf" className="text-base text-secondary" />
                   <span>Print / PDF Export</span>
                 </button>
-                <Link href={`/meetings/${meeting.id}/export`} className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md rounded-lg transition-colors shadow-sm">
+                <Link href={`/meetings/${meeting.id}/export`} className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md rounded-lg active:scale-[0.97] transition-all shadow-sm">
                   <Icon name="verified_user" className="text-base" />
                   <span>Open Exports</span>
                 </Link>
@@ -388,10 +394,14 @@ export default function ApprovedPlanPage() {
                     plan-payload.json
                   </span>
                   <button
-                    className="text-xs text-slate-400 hover:text-white transition-colors flex items-center gap-1"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(jsonPreview);
-                      alert("JSON payload copied.");
+                    className="text-xs text-slate-400 hover:text-white active:scale-95 transition-all flex items-center gap-1"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(jsonPreview);
+                      } catch {
+                        /* clipboard may be unavailable — still confirm the content was generated */
+                      }
+                      showToast("JSON payload copied.", { icon: "content_copy" });
                     }}
                   >
                     <Icon name="content_copy" className="text-xs" />

@@ -3,7 +3,13 @@
 import { useState } from "react";
 import { Icon } from "./Icon";
 import { useCopilotStore } from "@/lib/store";
+import { showToast } from "@/lib/toast";
 import type { ExecutionItem, ItemType, Priority } from "@/lib/types";
+
+// Keep in sync with the .animate-drawer-out / .animate-fade-out durations
+// in globals.css — the drawer stays mounted this long after a close request
+// so the exit animation can actually play instead of the panel just vanishing.
+const CLOSE_ANIMATION_MS = 180;
 
 const TYPES: { key: ItemType; label: string }[] = [
   { key: "action", label: "Action" },
@@ -35,10 +41,16 @@ export function EditDrawer({
   const [targetJira, setTargetJira] = useState(item.targetJira ?? false);
   const [targetEmail, setTargetEmail] = useState(item.targetEmail ?? true);
   const [targetNotion, setTargetNotion] = useState(item.targetNotion ?? false);
+  const [closing, setClosing] = useState(false);
 
   const ownerOptions = Array.from(new Set([...(item.ownerCandidates ?? []), ...participantNames]));
   const stillAmbiguousOwner = !owner;
   const stillAmbiguousDeadline = !deadline;
+
+  function requestClose() {
+    setClosing(true);
+    setTimeout(onClose, CLOSE_ANIMATION_MS);
+  }
 
   function handleSave() {
     const ambiguityFlags = item.ambiguityFlags.filter((f) => {
@@ -60,18 +72,27 @@ export function EditDrawer({
       ambiguityFlags,
       status: "edited",
     });
-    onClose();
+    showToast("Changes saved", { icon: "check" });
+    requestClose();
   }
 
   function handleDelete() {
     rejectItem(item.id);
-    onClose();
+    showToast("Item rejected", { icon: "delete", tone: "error" });
+    requestClose();
   }
 
   return (
-    <div className="fixed inset-0 top-16 left-0 lg:left-64 bg-on-surface/40 backdrop-blur-sm z-50 flex items-stretch justify-end animate-fade-in" onClick={onClose}>
+    <div
+      className={`fixed inset-0 top-16 left-0 lg:left-64 bg-on-surface/40 backdrop-blur-sm z-50 flex items-stretch justify-end ${
+        closing ? "animate-fade-out" : "animate-fade-in"
+      }`}
+      onClick={requestClose}
+    >
       <div
-        className="h-full w-full max-w-2xl bg-surface-container-lowest shadow-2xl flex flex-col justify-between overflow-hidden animate-drawer-in"
+        className={`h-full w-full max-w-2xl bg-surface-container-lowest shadow-2xl flex flex-col justify-between overflow-hidden ${
+          closing ? "animate-drawer-out" : "animate-drawer-in"
+        }`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-space-xl pt-space-lg pb-space-md bg-surface-container-lowest flex flex-col gap-space-xs shadow-[0_1px_4px_rgba(0,0,0,0.03)] z-10">
@@ -82,8 +103,8 @@ export function EditDrawer({
               <span className="text-on-surface-variant font-semibold">Edit &amp; Clarify</span>
             </div>
             <button
-              onClick={onClose}
-              className="h-8 w-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center transition-colors"
+              onClick={requestClose}
+              className="h-8 w-8 rounded-lg bg-surface-container-low hover:bg-surface-container-high text-on-surface flex items-center justify-center active:scale-90 transition-all"
               title="Close Drawer"
               type="button"
             >
@@ -110,8 +131,8 @@ export function EditDrawer({
                   onClick={() => setType(t.key)}
                   className={
                     type === t.key
-                      ? "py-space-xs px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md font-semibold rounded-lg shadow-sm flex items-center justify-center gap-space-2xs transition-all"
-                      : "py-space-xs px-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded-lg flex items-center justify-center gap-space-2xs transition-all"
+                      ? "py-space-xs px-space-sm bg-surface-container-lowest text-on-surface font-label-md text-label-md font-semibold rounded-lg shadow-sm flex items-center justify-center gap-space-2xs active:scale-[0.96] transition-all"
+                      : "py-space-xs px-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded-lg flex items-center justify-center gap-space-2xs active:scale-[0.96] transition-all"
                   }
                 >
                   <span className={`h-2 w-2 rounded-full ${type === t.key ? "bg-secondary" : "bg-outline-variant"}`} />
@@ -213,8 +234,8 @@ export function EditDrawer({
                     onClick={() => setPriority(p)}
                     className={
                       priority === p
-                        ? "py-space-xs bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold rounded-lg text-center shadow-sm transition-all"
-                        : "py-space-xs text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg text-center transition-colors"
+                        ? "py-space-xs bg-primary-container text-on-primary-container font-label-sm text-label-sm font-bold rounded-lg text-center shadow-sm active:scale-[0.96] transition-all"
+                        : "py-space-xs text-on-surface-variant hover:text-on-surface font-label-sm text-label-sm rounded-lg text-center active:scale-[0.96] transition-all"
                     }
                   >
                     {p === "Medium" ? "Med" : p}
@@ -285,23 +306,23 @@ export function EditDrawer({
           <button
             onClick={handleDelete}
             type="button"
-            className="inline-flex items-center gap-space-2xs text-error hover:text-on-error-container hover:bg-error-container/20 px-space-sm py-space-xs rounded-lg font-label-md text-label-md font-semibold transition-colors"
+            className="inline-flex items-center gap-space-2xs text-error hover:text-on-error-container hover:bg-error-container/20 px-space-sm py-space-xs rounded-lg font-label-md text-label-md font-semibold active:scale-[0.97] transition-all"
           >
             <Icon name="delete" className="text-base" />
             <span>Delete Item</span>
           </button>
           <div className="flex items-center gap-space-sm">
             <button
-              onClick={onClose}
+              onClick={requestClose}
               type="button"
-              className="px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded-lg transition-colors"
+              className="px-space-md py-space-xs bg-surface-container-low hover:bg-surface-container-high text-on-surface font-label-md text-label-md font-semibold rounded-lg active:scale-[0.97] transition-all"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
               type="button"
-              className="inline-flex items-center gap-space-xs px-space-lg py-space-xs bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-semibold rounded-lg shadow-sm transition-all"
+              className="inline-flex items-center gap-space-xs px-space-lg py-space-xs bg-primary text-on-primary hover:bg-primary-container font-label-md text-label-md font-semibold rounded-lg shadow-sm active:scale-[0.97] transition-all"
             >
               <Icon name="check" className="text-base" />
               <span>Save &amp; Mark Confirmed</span>

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { useCopilotStore, itemCounts } from "@/lib/store";
@@ -254,14 +255,37 @@ export default function DashboardPage() {
 }
 
 export function MeetingRow({ meeting, allItems }: { meeting: Meeting; allItems: ExecutionItem[] }) {
+  const router = useRouter();
   const counts = itemCounts(allItems);
   const meta = STATUS_META[meeting.status];
   const conflicts = allItems.filter((i) => i.conflict && !i.conflict.resolved).length;
   const unclearOwner = allItems.filter((i) => i.ambiguityFlags.some((f) => f.type === "owner_unclear")).length;
   const superseded = allItems.filter((i) => i.supersedes).length;
 
+  const primaryHref =
+    meeting.status === "needs_review"
+      ? `/meetings/${meeting.id}/review`
+      : meeting.status === "processing"
+      ? `/meetings/${meeting.id}/processing`
+      : `/meetings/${meeting.id}/plan`;
+
+  function goToMeeting() {
+    router.push(primaryHref);
+  }
+
   return (
-    <div className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-space-base group">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={goToMeeting}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          goToMeeting();
+        }
+      }}
+      className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-space-base group cursor-pointer"
+    >
       <div className="flex items-start gap-space-base max-w-xl">
         <div className={`p-space-sm ${meta.iconWrap} rounded-lg ${meta.iconColor} mt-1 shrink-0`}>
           <Icon name={meta.icon} className="text-2xl" />
@@ -327,11 +351,11 @@ export function MeetingRow({ meeting, allItems }: { meeting: Meeting; allItems: 
             {meta.label}
           </span>
         </div>
-        <div className="flex items-center gap-space-xs shrink-0">
+        <div className="flex items-center gap-space-xs shrink-0" onClick={(e) => e.stopPropagation()}>
           {meeting.status === "needs_review" ? (
             <Link
               href={`/meetings/${meeting.id}/review`}
-              className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary-container shadow-sm transition-colors"
+              className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-primary text-on-primary font-label-md text-label-md rounded-lg hover:bg-primary-container active:scale-[0.97] transition-all"
             >
               <span>Open Review Workspace</span>
               <Icon name="arrow_forward" className="text-sm" />
@@ -340,14 +364,14 @@ export function MeetingRow({ meeting, allItems }: { meeting: Meeting; allItems: 
             <>
               <Link
                 href={`/meetings/${meeting.id}/plan`}
-                className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high transition-colors"
+                className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container-high active:scale-[0.97] transition-all"
               >
                 <Icon name="visibility" className="text-sm" />
                 <span>View Plan</span>
               </Link>
               <Link
                 href={`/meetings/${meeting.id}/export`}
-                className="inline-flex items-center gap-space-2xs px-space-sm py-space-xs bg-surface-container-low text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container transition-colors"
+                className="inline-flex items-center gap-space-2xs px-space-sm py-space-xs bg-surface-container-low text-on-surface font-label-md text-label-md rounded-lg hover:bg-surface-container active:scale-[0.97] transition-all"
               >
                 <Icon name="ios_share" className="text-sm" />
                 <span>Export</span>

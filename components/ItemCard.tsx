@@ -6,6 +6,7 @@ import { EvidenceBlock } from "./EvidenceBlock";
 import { StatusBadge, TypeBadge } from "./StatusBadge";
 import { AMBIGUITY_LABEL } from "@/lib/format";
 import { useCopilotStore } from "@/lib/store";
+import { showToast } from "@/lib/toast";
 import type { ExecutionItem } from "@/lib/types";
 
 export function ItemCard({
@@ -33,11 +34,27 @@ export function ItemCard({
       status: "edited",
       ambiguityFlags: item.ambiguityFlags.filter((f) => f.type !== "owner_unclear"),
     });
+    showToast(`Owner confirmed: ${name}`, { icon: "person_check" });
+  }
+
+  function handleApprove() {
+    approveItem(item.id);
+    showToast("Item approved", { icon: "check_circle" });
+  }
+
+  function handleReject() {
+    rejectItem(item.id);
+    showToast("Item rejected", { icon: "close", tone: "error" });
+  }
+
+  function handleResolveConflict() {
+    resolveConflict(item.id, chosenResolution === "defer" ? "Deferred to a follow-up sync" : `Set as ${chosenResolution}`, undefined);
+    showToast("Conflict resolved", { icon: "gavel" });
   }
 
   return (
     <div
-      className={`bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden ${
+      className={`bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden ${
         rejected ? "opacity-50" : ""
       } ${item.conflict && !item.conflict.resolved ? "shadow-md" : ""}`}
     >
@@ -218,7 +235,7 @@ export function ItemCard({
 
       {/* Resolved conflict summary */}
       {item.conflict?.resolved && (
-        <div className="bg-surface-container-low p-space-md rounded-lg mb-space-md flex items-start gap-space-sm">
+        <div className="bg-surface-container-low p-space-md rounded-lg mb-space-md flex items-start gap-space-sm animate-fade-in">
           <Icon name="gavel" className="text-secondary text-xl shrink-0 mt-0.5" />
           <div className="flex flex-col gap-space-2xs">
             <span className="font-label-sm text-label-sm uppercase font-semibold text-secondary">Arbitration Outcome</span>
@@ -273,8 +290,8 @@ export function ItemCard({
                 onClick={() => confirmOwner(name)}
                 className={
                   idx === 0
-                    ? "px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center gap-space-2xs"
-                    : "px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors flex items-center gap-space-2xs"
+                    ? "px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container active:scale-[0.96] transition-all flex items-center gap-space-2xs"
+                    : "px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md active:scale-[0.96] transition-all flex items-center gap-space-2xs"
                 }
               >
                 <Icon name={idx === 0 ? "person_check" : "assignment_ind"} className="text-sm" />
@@ -287,14 +304,8 @@ export function ItemCard({
         ) : item.conflict && !item.conflict.resolved ? (
           <div className="flex items-center justify-end gap-space-xs w-full">
             <button
-              onClick={() =>
-                resolveConflict(
-                  item.id,
-                  chosenResolution === "defer" ? "Deferred to a follow-up sync" : `Set as ${chosenResolution}`,
-                  undefined
-                )
-              }
-              className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center gap-space-2xs"
+              onClick={handleResolveConflict}
+              className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container active:scale-[0.96] transition-all flex items-center gap-space-2xs"
             >
               <Icon name="done_all" className="text-sm" />
               <span>Resolve Question</span>
@@ -308,17 +319,17 @@ export function ItemCard({
             </div>
             <div className="flex items-center gap-space-xs">
               {rejected ? null : item.status !== "approved" && (
-                <button onClick={() => rejectItem(item.id)} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors">
+                <button onClick={handleReject} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container active:scale-[0.96] transition-all font-label-md text-label-md">
                   Reject
                 </button>
               )}
-              <button onClick={onEdit} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container font-label-md text-label-md transition-colors">
+              <button onClick={onEdit} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container active:scale-[0.96] transition-all font-label-md text-label-md">
                 Edit
               </button>
               {item.status !== "approved" && (
                 <button
-                  onClick={() => approveItem(item.id)}
-                  className="px-space-md py-space-xs rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container transition-colors flex items-center gap-space-2xs"
+                  onClick={handleApprove}
+                  className="px-space-md py-space-xs rounded-lg bg-secondary text-on-secondary font-label-md text-label-md hover:bg-secondary-container active:scale-[0.96] transition-all flex items-center gap-space-2xs"
                 >
                   <Icon name="task_alt" className="text-sm" />
                   <span>Approve Decision</span>
@@ -330,16 +341,22 @@ export function ItemCard({
           <div className="flex items-center justify-end gap-space-xs w-full">
             {item.status !== "approved" && (
               <button
-                onClick={() => updateItem(item.id, { status: "edited" })}
-                className="px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high font-label-md text-label-md transition-colors"
+                onClick={() => {
+                  updateItem(item.id, { status: "edited" });
+                  showToast("Risk acknowledged", { icon: "check" });
+                }}
+                className="px-space-md py-space-xs rounded-lg bg-surface-container text-on-surface hover:bg-surface-container-high active:scale-[0.96] transition-all font-label-md text-label-md"
               >
                 Acknowledge Risk
               </button>
             )}
             {item.status !== "approved" && (
               <button
-                onClick={() => approveItem(item.id)}
-                className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container transition-colors flex items-center gap-space-2xs"
+                onClick={() => {
+                  approveItem(item.id);
+                  showToast("Converted to priority blocker issue", { icon: "add_task" });
+                }}
+                className="px-space-md py-space-xs rounded-lg bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-container active:scale-[0.96] transition-all flex items-center gap-space-2xs"
               >
                 <Icon name="add_task" className="text-sm" />
                 <span>Convert to Priority Blocker Issue</span>
@@ -356,19 +373,19 @@ export function ItemCard({
             </div>
             <div className="flex items-center gap-space-xs">
               {item.status !== "approved" && (
-                <button onClick={() => rejectItem(item.id)} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-colors flex items-center gap-space-2xs">
+                <button onClick={handleReject} className="px-space-sm py-space-xs rounded-lg text-outline hover:text-on-surface hover:bg-surface-container-low active:scale-[0.96] transition-all flex items-center gap-space-2xs font-label-md text-label-md">
                   <Icon name="close" className="text-sm" />
                   <span>Reject</span>
                 </button>
               )}
-              <button onClick={onEdit} className="px-space-sm py-space-xs rounded-lg text-on-surface bg-surface-container hover:bg-surface-container-high font-label-md text-label-md transition-colors flex items-center gap-space-2xs">
+              <button onClick={onEdit} className="px-space-sm py-space-xs rounded-lg text-on-surface bg-surface-container hover:bg-surface-container-high active:scale-[0.96] transition-all flex items-center gap-space-2xs font-label-md text-label-md">
                 <Icon name="edit" className="text-sm" />
                 <span>Edit</span>
               </button>
               {item.status !== "approved" && (
                 <button
-                  onClick={() => approveItem(item.id)}
-                  className="px-space-md py-space-xs rounded-lg bg-tertiary-container text-on-tertiary font-label-md text-label-md hover:opacity-90 transition-opacity flex items-center gap-space-2xs"
+                  onClick={handleApprove}
+                  className="px-space-md py-space-xs rounded-lg bg-tertiary-container text-on-tertiary font-label-md text-label-md hover:opacity-90 active:scale-[0.96] transition-all flex items-center gap-space-2xs"
                 >
                   <Icon name="check" className="text-sm" />
                   <span>Approve</span>

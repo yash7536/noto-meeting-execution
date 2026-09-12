@@ -29,10 +29,16 @@ export default function FollowUpPage() {
   const [editing, setEditing] = useState(false);
   const [bodyOverride, setBodyOverride] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   function showToast(msg: string) {
     setToast(msg);
     setTimeout(() => setToast(null), 3200);
+  }
+
+  function flashCopied(key: string) {
+    setCopiedKey(key);
+    setTimeout(() => setCopiedKey((k) => (k === key ? null : k)), 1600);
   }
 
   if (!meeting) {
@@ -52,13 +58,14 @@ export default function FollowUpPage() {
     setFollowUp(meeting!.id, { ...config, ...patch });
   }
 
-  async function copyToClipboard(text: string, message: string) {
+  async function copyToClipboard(text: string, message: string, key?: string) {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
       /* clipboard may be unavailable — still show confirmation of the generated content */
     }
     showToast(message);
+    if (key) flashCopied(key);
   }
 
   return (
@@ -115,14 +122,14 @@ export default function FollowUpPage() {
                 setBodyOverride(null);
                 showToast("Draft rebuilt from the current set of approved items.");
               }}
-              className="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded shadow-sm transition-all"
+              className="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded shadow-sm active:scale-[0.97] transition-all"
             >
               <Icon name="cached" className="text-base" />
               <span>Regenerate Draft</span>
             </button>
             <button
               onClick={() => setEditing((v) => !v)}
-              className={`flex items-center gap-space-xs px-space-md py-space-sm font-label-md text-label-md rounded shadow-sm transition-all ${
+              className={`flex items-center gap-space-xs px-space-md py-space-sm font-label-md text-label-md rounded shadow-sm active:scale-[0.97] transition-all ${
                 editing ? "bg-secondary-fixed text-on-secondary-fixed-variant" : "bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface"
               }`}
             >
@@ -130,15 +137,17 @@ export default function FollowUpPage() {
               <span>{editing ? "Editing Active..." : "Edit Email Content"}</span>
             </button>
             <button
-              onClick={() => copyToClipboard(body, "Follow-up email copied to clipboard!")}
-              className="flex items-center gap-space-xs px-space-md py-space-sm bg-surface-container-highest hover:bg-primary-fixed text-primary font-label-md text-label-md rounded shadow-sm transition-all"
+              onClick={() => copyToClipboard(body, "Follow-up email copied to clipboard!", "email-body")}
+              className={`flex items-center gap-space-xs px-space-md py-space-sm font-label-md text-label-md rounded shadow-sm active:scale-[0.97] transition-all ${
+                copiedKey === "email-body" ? "bg-tertiary-container text-on-tertiary-container" : "bg-surface-container-highest hover:bg-primary-fixed text-primary"
+              }`}
             >
-              <Icon name="content_copy" className="text-base" />
-              <span>Copy Email to Clipboard</span>
+              <Icon name={copiedKey === "email-body" ? "check" : "content_copy"} className="text-base" />
+              <span>{copiedKey === "email-body" ? "Copied!" : "Copy Email to Clipboard"}</span>
             </button>
             <button
               onClick={() => showToast("Sending requires a connected mail provider — not wired in this demo.")}
-              className="flex items-center gap-space-xs px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded shadow-sm transition-all"
+              className="flex items-center gap-space-xs px-space-lg py-space-sm bg-primary hover:bg-primary-container text-on-primary font-label-md text-label-md rounded shadow-sm active:scale-[0.97] transition-all"
             >
               <Icon name="send" className="text-base" />
               <span>Send via Outlook / Gmail</span>
@@ -218,8 +227,8 @@ export default function FollowUpPage() {
                     }}
                     className={
                       config.tone === t.key
-                        ? "py-space-xs px-space-2xs text-center font-label-sm text-label-sm rounded font-semibold bg-surface-container-lowest text-on-surface shadow-sm transition-all"
-                        : "py-space-xs px-space-2xs text-center font-label-sm text-label-sm rounded text-on-surface-variant hover:text-on-surface transition-all"
+                        ? "py-space-xs px-space-2xs text-center font-label-sm text-label-sm rounded font-semibold bg-surface-container-lowest text-on-surface shadow-sm active:scale-[0.96] transition-all"
+                        : "py-space-xs px-space-2xs text-center font-label-sm text-label-sm rounded text-on-surface-variant hover:text-on-surface active:scale-[0.96] transition-all"
                     }
                   >
                     {t.label}
@@ -296,8 +305,8 @@ export default function FollowUpPage() {
                         onChange={(e) => updateConfig({ subject: e.target.value })}
                         className="font-headline-sm text-headline-sm text-on-surface font-semibold bg-transparent focus:outline-none flex-1"
                       />
-                      <button onClick={() => copyToClipboard(config.subject, `Subject line copied.`)} className="text-outline hover:text-primary p-space-2xs rounded hover:bg-surface-container transition-colors" title="Copy Subject">
-                        <Icon name="copy_all" className="text-sm" />
+                      <button onClick={() => copyToClipboard(config.subject, `Subject line copied.`, "subject-inline")} className={`p-space-2xs rounded transition-all active:scale-90 ${copiedKey === "subject-inline" ? "text-tertiary" : "text-outline hover:text-primary hover:bg-surface-container"}`} title="Copy Subject">
+                        <Icon name={copiedKey === "subject-inline" ? "check" : "copy_all"} className="text-sm" />
                       </button>
                     </div>
                   </div>
@@ -346,22 +355,22 @@ export default function FollowUpPage() {
             <div className="px-space-xl py-space-md bg-surface-container-low rounded-lg flex flex-wrap items-center justify-between gap-space-md">
               <div className="flex flex-wrap items-center gap-space-xs">
                 <button
-                  onClick={() => copyToClipboard(config.subject, "Subject line copied.")}
-                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs transition-colors"
+                  onClick={() => copyToClipboard(config.subject, "Subject line copied.", "subject-toolbar")}
+                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs active:scale-[0.97] transition-all"
                 >
-                  <Icon name="title" className="text-sm text-outline" />
-                  <span>Copy Subject Line</span>
+                  <Icon name={copiedKey === "subject-toolbar" ? "check" : "title"} className="text-sm text-outline" />
+                  <span>{copiedKey === "subject-toolbar" ? "Copied!" : "Copy Subject Line"}</span>
                 </button>
                 <button
-                  onClick={() => copyToClipboard(buildMarkdown(meeting, sections, config), "Clean Markdown copied.")}
-                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs transition-colors"
+                  onClick={() => copyToClipboard(buildMarkdown(meeting, sections, config), "Clean Markdown copied.", "markdown")}
+                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs active:scale-[0.97] transition-all"
                 >
-                  <Icon name="code" className="text-sm text-outline" />
-                  <span>Export as Markdown</span>
+                  <Icon name={copiedKey === "markdown" ? "check" : "code"} className="text-sm text-outline" />
+                  <span>{copiedKey === "markdown" ? "Copied!" : "Export as Markdown"}</span>
                 </button>
                 <button
                   onClick={() => showToast(`Test copy dispatched to ${config.to}.`)}
-                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs transition-colors"
+                  className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs active:scale-[0.97] transition-all"
                 >
                   <Icon name="mark_email_read" className="text-sm text-outline" />
                   <span>Send Test to Myself</span>

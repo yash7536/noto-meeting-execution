@@ -38,7 +38,7 @@ export default function ExecutionPlansPage() {
               <Link
                 key={m.id}
                 href={`/meetings/${m.id}/plan`}
-                className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
               >
                 <div className="flex items-start gap-space-base">
                   <div className="w-11 h-11 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0">
@@ -83,7 +83,7 @@ export default function ExecutionPlansPage() {
                 <Link
                   key={m.id}
                   href={`/meetings/${m.id}/review`}
-                  className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                  className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
                 >
                   <div className="flex items-start gap-space-base">
                     <div className="w-11 h-11 rounded-lg bg-error-container flex items-center justify-center text-on-error-container shrink-0">
