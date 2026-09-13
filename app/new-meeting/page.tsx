@@ -132,7 +132,7 @@ export default function NewMeetingPage() {
         </div>
 
         {/* Header Section */}
-        <div className="flex flex-col gap-space-xs max-w-3xl">
+        <div className="animate-section-in flex flex-col gap-space-xs max-w-3xl">
           <div className="flex items-center gap-space-xs">
             <span className="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold">Input &amp; Grounding Matrix</span>
             <span className="text-outline-variant">•</span>
@@ -145,7 +145,7 @@ export default function NewMeetingPage() {
         </div>
 
         {/* Configuration Strip */}
-        <div className="bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
+        <div className="animate-section-in stagger-1 bg-surface-container-lowest rounded-xl p-space-md shadow-sm">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-space-md items-end">
             <div className="md:col-span-6 flex flex-col gap-space-2xs">
               <label className="font-label-sm text-label-sm font-semibold uppercase tracking-wider text-outline flex items-center gap-space-2xs">
@@ -177,7 +177,7 @@ export default function NewMeetingPage() {
                 <Icon name="hub" className="text-sm" />
                 Target Team / Project
               </label>
-              <div className="relative flex items-center bg-surface-container-low rounded-lg px-space-md py-space-sm hover:bg-surface-container transition-colors">
+              <div className="relative flex items-center bg-surface-container-low rounded-lg px-space-md py-space-sm hover:bg-surface-container focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                 <span className="w-2 h-2 rounded-full bg-secondary mr-space-xs" />
                 <input
                   value={team}
@@ -190,7 +190,7 @@ export default function NewMeetingPage() {
         </div>
 
         {/* Central Editor Card */}
-        <div className="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col">
+        <div className="animate-section-in stagger-2 bg-surface-container-lowest rounded-xl shadow-md overflow-hidden flex flex-col">
           <div className="bg-surface-container-low px-space-lg py-space-sm flex flex-wrap items-center justify-between gap-space-sm">
             <div className="inline-flex bg-surface-container p-space-2xs rounded-lg">
               <button
@@ -223,7 +223,7 @@ export default function NewMeetingPage() {
               </div>
               <button
                 onClick={() => setTranscript("")}
-                className="flex items-center gap-space-2xs text-outline hover:text-error font-label-sm text-label-sm uppercase tracking-wider transition-colors"
+                className="flex items-center gap-space-2xs text-outline hover:text-error active:scale-[0.96] font-label-sm text-label-sm uppercase tracking-wider transition-all"
               >
                 <Icon name="delete_sweep" className="text-sm" />
                 <span>Reset</span>
@@ -232,7 +232,7 @@ export default function NewMeetingPage() {
           </div>
 
           {mode === "paste" ? (
-            <div className="relative flex min-h-[380px] p-space-md bg-surface-container-lowest">
+            <div className="relative flex min-h-[380px] p-space-md bg-surface-container-lowest transition-shadow duration-200 focus-within:ring-2 focus-within:ring-primary/20 focus-within:ring-inset">
               <textarea
                 value={transcript}
                 onChange={(e) => setTranscript(e.target.value)}
@@ -305,7 +305,7 @@ export default function NewMeetingPage() {
                 <button
                   key={key}
                   onClick={() => setTranscript(text)}
-                  className="px-space-sm py-space-2xs bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface rounded font-label-sm text-label-sm transition-colors shadow-sm capitalize"
+                  className="px-space-sm py-space-2xs bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface active:scale-[0.96] rounded font-label-sm text-label-sm transition-all shadow-sm capitalize"
                 >
                   {key === "meet" ? "Google Meet" : key === "zoom" ? "Zoom Audio" : "Slack Huddle"}
                 </button>
@@ -322,7 +322,7 @@ export default function NewMeetingPage() {
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface font-label-md text-label-md font-medium transition-colors"
+                className="px-space-md py-space-sm text-on-surface-variant hover:text-on-surface active:scale-[0.97] font-label-md text-label-md font-medium transition-all"
               >
                 Cancel
               </button>
@@ -333,15 +333,15 @@ export default function NewMeetingPage() {
                 className="flex items-center gap-space-sm px-space-lg py-space-sm bg-primary text-on-primary rounded-lg font-headline-sm text-headline-sm hover:bg-primary-container shadow-md transition-all active:scale-[0.99] disabled:opacity-60"
               >
                 {submitting ? (
-                  <>
+                  <span key="loading" className="flex items-center gap-space-sm animate-fade-in">
                     <span className="w-4 h-4 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
                     <span>Synthesizing Commitments...</span>
-                  </>
+                  </span>
                 ) : (
-                  <>
+                  <span key="idle" className="flex items-center gap-space-sm animate-fade-in">
                     <span>Analyze Meeting</span>
                     <Icon name="arrow_forward" className="text-lg" />
-                  </>
+                  </span>
                 )}
               </button>
             </div>

@@ -185,7 +185,7 @@ export function EditDrawer({
                 <select
                   value={owner}
                   onChange={(e) => setOwner(e.target.value)}
-                  className="w-full appearance-none bg-surface-container-low hover:bg-surface-container rounded-xl px-space-md py-space-sm pr-space-xl font-body-md text-body-md text-on-surface font-medium focus:outline-none shadow-sm cursor-pointer transition-colors"
+                  className="w-full appearance-none bg-surface-container-low hover:bg-surface-container rounded-xl px-space-md py-space-sm pr-space-xl font-body-md text-body-md text-on-surface font-medium focus:outline-none focus:ring-2 focus:ring-primary/20 shadow-sm cursor-pointer transition-all"
                 >
                   <option value="">— Needs Clarification / Unassigned —</option>
                   {ownerOptions.map((name) => (
@@ -205,7 +205,7 @@ export function EditDrawer({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-space-lg">
             <div className="flex flex-col gap-space-xs">
               <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Due Date / Deadline</label>
-              <div className="relative flex items-center bg-surface-container-low rounded-xl px-space-md py-space-xs shadow-sm">
+              <div className="relative flex items-center bg-surface-container-low rounded-xl px-space-md py-space-xs shadow-sm focus-within:ring-2 focus-within:ring-primary/20 transition-all">
                 <Icon name="calendar_today" className="text-secondary text-lg mr-space-xs" />
                 <input
                   value={deadline}

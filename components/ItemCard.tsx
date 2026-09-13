@@ -54,7 +54,7 @@ export function ItemCard({
 
   return (
     <div
-      className={`bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden ${
+      className={`bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md border border-transparent hover:border-outline-variant/30 transition-all duration-300 relative overflow-hidden ${
         rejected ? "opacity-50" : ""
       } ${item.conflict && !item.conflict.resolved ? "shadow-md" : ""}`}
     >
@@ -63,7 +63,7 @@ export function ItemCard({
       )}
 
       {hasBanner && item.ambiguityFlags.length > 0 && (
-        <div className="bg-error-container text-on-error-container px-space-md py-space-xs rounded-lg flex items-center justify-between mb-space-md flex-wrap gap-space-xs">
+        <div className="animate-badge-in bg-error-container text-on-error-container px-space-md py-space-xs rounded-lg flex items-center justify-between mb-space-md flex-wrap gap-space-xs">
           <div className="flex items-center gap-space-xs">
             <Icon name="warning" className="text-error text-base" />
             <span className="font-label-md text-label-md font-semibold">
@@ -74,7 +74,7 @@ export function ItemCard({
       )}
 
       {item.conflict && !item.conflict.resolved && (
-        <div className="bg-surface-container text-on-surface px-space-md py-space-xs rounded-lg flex items-center justify-between mb-space-md flex-wrap gap-space-xs">
+        <div className="animate-badge-in bg-surface-container text-on-surface px-space-md py-space-xs rounded-lg flex items-center justify-between mb-space-md flex-wrap gap-space-xs">
           <div className="flex items-center gap-space-xs">
             <Icon name="forum" className="text-secondary-container text-base" />
             <span className="font-label-md text-label-md font-semibold">Stakeholder conflict detected · needs a single resolved answer</span>
@@ -86,7 +86,9 @@ export function ItemCard({
       <div className="flex items-center justify-between gap-space-sm mb-space-sm flex-wrap">
         <div className="flex items-center gap-space-xs flex-wrap">
           <TypeBadge type={item.type} />
-          <StatusBadge status={item.status} />
+          <span key={item.status} className="animate-pop-in inline-flex">
+            <StatusBadge status={item.status} />
+          </span>
           {item.supersedes && (
             <span className="px-space-sm py-space-2xs bg-secondary-fixed text-on-secondary-fixed-variant font-label-sm text-label-sm rounded-full flex items-center gap-space-2xs">
               <Icon name="history" className="text-xs" />
@@ -154,23 +156,25 @@ export function ItemCard({
         </div>
       )}
 
-      {/* Decision supersede diff */}
+      {/* Decision supersede diff — the three rows reveal in sequence (rather
+          than all at once) so the "this replaced that" relationship reads
+          clearly instead of landing as a single flat block. */}
       {item.supersedes && (
         <div className="bg-surface-container-low rounded-xl p-space-md mb-space-md flex flex-col gap-space-sm">
-          <div className="flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant line-through opacity-70 bg-surface-container-lowest p-space-sm rounded-lg flex-wrap gap-space-xs">
+          <div className="animate-badge-in flex items-center justify-between text-body-sm font-body-sm text-on-surface-variant line-through opacity-70 bg-surface-container-lowest p-space-sm rounded-lg flex-wrap gap-space-xs">
             <div className="flex items-center gap-space-xs">
               <Icon name="cancel" className="text-outline text-base" />
               <span>Original Plan: {item.supersedes.previousTitle}</span>
             </div>
             <span className="font-mono-code text-mono-code text-outline">[{item.supersedes.previousTimestamp}]</span>
           </div>
-          <div className="flex items-center justify-center -my-space-2xs">
+          <div className="animate-badge-in stagger-1 flex items-center justify-center -my-space-2xs">
             <div className="flex items-center gap-space-xs px-space-sm py-space-2xs bg-surface-container text-secondary font-label-sm text-label-sm rounded-full">
               <Icon name="south" className="text-xs" />
               <span>Superseded during discussion at [{item.supersedes.supersededAtTimestamp}]</span>
             </div>
           </div>
-          <div className="flex items-center justify-between text-body-sm font-body-sm text-on-surface bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex-wrap gap-space-xs">
+          <div className="animate-badge-in stagger-2 flex items-center justify-between text-body-sm font-body-sm text-on-surface bg-surface-container-lowest p-space-sm rounded-lg shadow-sm flex-wrap gap-space-xs">
             <div className="flex items-center gap-space-xs">
               <Icon name="check_circle" className="text-secondary text-base" />
               <span className="font-semibold">Final Consensus: {item.title}</span>
@@ -182,7 +186,7 @@ export function ItemCard({
       {/* Superseded-by note (reverse of the supersede diff above — shown on
           the OLDER decision so it stays self-descriptive on its own card) */}
       {item.supersededBy && !item.supersedes && (
-        <div className="bg-surface-container-low rounded-xl p-space-md mb-space-md flex items-center gap-space-sm">
+        <div className="animate-badge-in bg-surface-container-low rounded-xl p-space-md mb-space-md flex items-center gap-space-sm">
           <Icon name="history" className="text-outline text-base shrink-0" />
           <p className="font-body-sm text-body-sm text-on-surface-variant">
             Superseded by <span className="font-semibold text-on-surface">{item.supersededBy.title}</span> at [{item.supersededBy.timestamp}]
@@ -204,8 +208,12 @@ export function ItemCard({
       {/* Question with conflict: split evidence */}
       {item.type === "question" && item.conflict && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-space-sm mb-space-md">
-          {item.conflict.positions.map((p) => (
-            <div key={p.speaker} className="bg-surface-container-low p-space-md rounded-lg flex flex-col justify-between">
+          {item.conflict.positions.map((p, idx) => (
+            <div
+              key={p.speaker}
+              className="animate-card-in bg-surface-container-low p-space-md rounded-lg flex flex-col justify-between"
+              style={{ animationDelay: `${idx * 60}ms` }}
+            >
               <div>
                 <div className="flex items-center justify-between mb-space-2xs">
                   <span className="font-label-sm text-label-sm font-semibold text-on-surface">Position · {p.speaker}</span>
@@ -249,11 +257,18 @@ export function ItemCard({
 
       {/* Human resolution selector for unresolved conflicts */}
       {item.conflict && !item.conflict.resolved && (
-        <div className="bg-surface-container-low p-space-md rounded-lg mb-space-md">
+        <div className="animate-badge-in bg-surface-container-low p-space-md rounded-lg mb-space-md">
           <span className="font-label-sm text-label-sm text-outline uppercase font-semibold block mb-space-xs">Choose Single Truth Resolution:</span>
           <div className="space-y-space-xs">
             {item.conflict.positions.map((p) => (
-              <label key={p.stance} className="flex items-center gap-space-sm p-space-xs rounded-lg hover:bg-surface-container-lowest cursor-pointer transition-colors">
+              <label
+                key={p.stance}
+                className={`flex items-center gap-space-sm p-space-xs rounded-lg cursor-pointer border transition-all duration-200 ${
+                  chosenResolution === p.stance
+                    ? "bg-surface-container-lowest border-primary/30 shadow-sm"
+                    : "border-transparent hover:bg-surface-container-lowest"
+                }`}
+              >
                 <input
                   type="radio"
                   className="accent-primary"
@@ -266,7 +281,13 @@ export function ItemCard({
                 </span>
               </label>
             ))}
-            <label className="flex items-center gap-space-sm p-space-xs rounded-lg hover:bg-surface-container-lowest cursor-pointer transition-colors">
+            <label
+              className={`flex items-center gap-space-sm p-space-xs rounded-lg cursor-pointer border transition-all duration-200 ${
+                chosenResolution === "defer"
+                  ? "bg-surface-container-lowest border-primary/30 shadow-sm"
+                  : "border-transparent hover:bg-surface-container-lowest"
+              }`}
+            >
               <input
                 type="radio"
                 className="accent-primary"

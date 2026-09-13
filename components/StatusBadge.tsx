@@ -13,7 +13,7 @@ export function StatusBadge({ status }: { status: ReviewState }) {
     case "needs_review":
       return (
         <span className="px-space-sm py-space-2xs bg-error-container text-on-error-container font-label-sm text-label-sm rounded-full flex items-center gap-space-2xs font-semibold">
-          <span className="h-1.5 w-1.5 rounded-full bg-error animate-pulse" />
+          <span className="h-1.5 w-1.5 rounded-full bg-error animate-pop-in" />
           Needs Review
         </span>
       );

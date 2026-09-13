@@ -7,8 +7,10 @@ import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { ItemCard } from "@/components/ItemCard";
 import { EditDrawer } from "@/components/EditDrawer";
+import { CountUp } from "@/components/CountUp";
 import { useCopilotStore, itemCounts } from "@/lib/store";
 import { showToast } from "@/lib/toast";
+import { useSlidingIndicator } from "@/lib/useSlidingIndicator";
 import { formatShortDate } from "@/lib/format";
 import type { ExecutionItem, ItemType } from "@/lib/types";
 
@@ -28,6 +30,7 @@ export default function ReviewWorkspacePage() {
   const [editingItem, setEditingItem] = useState<ExecutionItem | null>(null);
   const [highlightId, setHighlightId] = useState<string | null>(null);
   const transcriptRef = useRef<HTMLDivElement>(null);
+  const { containerRef: tabsRef, style: tabIndicator } = useSlidingIndicator(filter);
 
   const counts = useMemo(() => itemCounts(items), [items]);
 
@@ -83,7 +86,7 @@ export default function ReviewWorkspacePage() {
     <AppShell>
       <div className="w-full px-gutter-desktop py-space-base flex flex-col gap-space-lg">
         {/* Header Meta & Global Actions Bar */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm">
+        <div className="animate-section-in flex flex-col lg:flex-row lg:items-center justify-between gap-space-md pb-space-sm">
           <div className="flex flex-col gap-space-2xs">
             <div className="flex items-center gap-space-xs flex-wrap">
               <Link href="/dashboard" className="font-label-sm text-label-sm text-outline uppercase tracking-wider hover:text-primary transition-colors">
@@ -106,11 +109,11 @@ export default function ReviewWorkspacePage() {
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant flex items-center gap-space-xs flex-wrap">
               <span className="h-2 w-2 rounded-full bg-secondary" />
-              <span>{items.length} execution items synthesized</span>
+              <span><CountUp value={items.length} /> execution items synthesized</span>
               {counts.needsReview.length > 0 && (
                 <>
                   <span className="text-outline">·</span>
-                  <span className="text-error font-medium">{counts.needsReview.length} require human review before export</span>
+                  <span className="text-error font-medium"><CountUp value={counts.needsReview.length} /> require human review before export</span>
                 </>
               )}
             </p>
@@ -176,7 +179,7 @@ export default function ReviewWorkspacePage() {
         )}
 
         {/* Telemetry Metric Summary Row */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-space-sm">
+        <div className="animate-section-in stagger-1 grid grid-cols-2 md:grid-cols-5 gap-space-sm">
           <TelemetryCard label="Total Synthesized" value={items.length} unit="items" onClick={() => setFilter("all")} active={filter === "all"} />
           <TelemetryCard
             label="Actions"
@@ -220,16 +223,21 @@ export default function ReviewWorkspacePage() {
         </div>
 
         {/* Segmented Navigation Filters */}
-        <div className="flex items-center justify-between gap-space-sm overflow-x-auto pb-space-xs">
-          <div className="inline-flex p-space-2xs bg-surface-container-high rounded-xl gap-space-2xs">
+        <div className="animate-section-in stagger-2 flex items-center justify-between gap-space-sm overflow-x-auto pb-space-xs">
+          <div ref={tabsRef} className="relative inline-flex p-space-2xs bg-surface-container-high rounded-xl gap-space-2xs">
+            <div
+              className="absolute rounded-lg bg-surface-container-lowest shadow-sm transition-all duration-300 ease-out"
+              style={{ left: tabIndicator.left, width: tabIndicator.width, top: 2, bottom: 2, opacity: tabIndicator.ready ? 1 : 0 }}
+            />
             {TABS.map((tab) => (
               <button
                 key={tab.key}
+                data-tab-key={tab.key}
                 onClick={() => setFilter(tab.key)}
                 className={
                   filter === tab.key
-                    ? "px-space-md py-space-xs rounded-lg bg-surface-container-lowest text-on-surface font-label-md text-label-md shadow-sm font-semibold flex items-center gap-space-xs whitespace-nowrap active:scale-[0.97] transition-all"
-                    : "px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface active:scale-[0.97] transition-all whitespace-nowrap"
+                    ? "relative z-10 px-space-md py-space-xs rounded-lg text-on-surface font-label-md text-label-md font-semibold flex items-center gap-space-xs whitespace-nowrap active:scale-[0.97] transition-transform"
+                    : "relative z-10 px-space-md py-space-xs rounded-lg font-label-md text-label-md text-on-surface-variant hover:text-on-surface active:scale-[0.97] transition-all whitespace-nowrap"
                 }
               >
                 <span>
@@ -242,14 +250,16 @@ export default function ReviewWorkspacePage() {
 
         {/* Core Review Workspace: Two-Column Split */}
         <div className={`grid grid-cols-1 ${splitView ? "lg:grid-cols-12" : ""} gap-space-lg items-start`}>
-          <div key={filter} className={splitView ? "lg:col-span-7 flex flex-col gap-space-base animate-fade-in" : "flex flex-col gap-space-base animate-fade-in"}>
+          <div key={filter} className={splitView ? "lg:col-span-7 flex flex-col gap-space-base" : "flex flex-col gap-space-base"}>
             {filteredItems.length === 0 && (
-              <div className="bg-surface-container-lowest rounded-xl p-space-xl text-center text-on-surface-variant font-body-md text-body-md shadow-sm">
+              <div className="bg-surface-container-lowest rounded-xl p-space-xl text-center text-on-surface-variant font-body-md text-body-md shadow-sm animate-fade-in">
                 Nothing in this filter right now.
               </div>
             )}
-            {filteredItems.map((item) => (
-              <ItemCard key={item.id} item={item} onEdit={() => setEditingItem(item)} onViewEvidence={handleViewEvidence} />
+            {filteredItems.map((item, idx) => (
+              <div key={item.id} className="animate-card-in" style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}>
+                <ItemCard item={item} onEdit={() => setEditingItem(item)} onViewEvidence={handleViewEvidence} />
+              </div>
             ))}
           </div>
 
@@ -278,7 +288,7 @@ export default function ReviewWorkspacePage() {
                     <div
                       key={t.id}
                       id={t.id}
-                      className={`p-space-sm rounded-lg transition-colors ${
+                      className={`p-space-sm rounded-lg transition-colors duration-300 ease-out ${
                         highlightId === t.id
                           ? "bg-primary-fixed"
                           : t.tag === "ambiguous"
@@ -366,7 +376,7 @@ function TelemetryCard({
         )}
       </div>
       <div className="mt-space-sm flex items-baseline gap-space-xs">
-        <span className={`font-display-lg text-headline-lg ${danger ? "text-error" : "text-on-surface"}`}>{value}</span>
+        <span className={`font-display-lg text-headline-lg ${danger ? "text-error" : "text-on-surface"}`}><CountUp value={value} /></span>
         <span className="font-mono-metric text-mono-metric text-outline">{unit}</span>
       </div>
       <div className="w-full bg-surface-container h-1 rounded-full mt-space-sm overflow-hidden">

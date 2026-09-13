@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
 import { useCopilotStore } from "@/lib/store";
+import { useSlidingIndicator } from "@/lib/useSlidingIndicator";
 import { formatShortDate } from "@/lib/format";
 import {
   buildCsv,
@@ -34,6 +35,7 @@ export default function ExportWorkspacePage() {
   const [tab, setTab] = useState<Tab>("jira");
   const [toast, setToast] = useState<string | null>(null);
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
+  const { containerRef: tabsRef, style: tabIndicator } = useSlidingIndicator(tab);
 
   const approved = useMemo(() => items.filter((i) => i.status === "approved"), [items]);
   const jiraItems = useMemo(() => approved.filter((i) => i.type === "action" || i.type === "risk"), [approved]);
@@ -81,7 +83,7 @@ export default function ExportWorkspacePage() {
       )}
 
       <div className="w-full px-gutter-desktop py-space-xl flex flex-col gap-space-xl max-w-7xl mx-auto">
-        <div className="flex flex-col gap-space-sm">
+        <div className="animate-section-in flex flex-col gap-space-sm">
           <div className="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md flex-wrap">
             <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
             <Icon name="chevron_right" className="text-xs" />
@@ -130,15 +132,20 @@ export default function ExportWorkspacePage() {
           </div>
         )}
 
-        <div className="w-full bg-surface-container-low p-space-xs rounded-xl flex items-center gap-space-xs shadow-sm overflow-x-auto">
+        <div ref={tabsRef} className="animate-section-in stagger-1 relative w-full bg-surface-container-low p-space-xs rounded-xl flex items-center gap-space-xs shadow-sm overflow-x-auto">
+          <div
+            className="absolute rounded-lg bg-surface-container-lowest shadow-[0_1px_2px_rgba(0,0,0,0.06)] transition-all duration-300 ease-out"
+            style={{ left: tabIndicator.left, width: tabIndicator.width, top: 4, bottom: 4, opacity: tabIndicator.ready ? 1 : 0 }}
+          />
           {TABS.map((t) => (
             <button
               key={t.key}
+              data-tab-key={t.key}
               onClick={() => setTab(t.key)}
               className={
                 tab === t.key
-                  ? "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-all bg-surface-container-lowest text-on-surface shadow-[0_1px_2px_rgba(0,0,0,0.06)] font-headline-sm text-headline-sm"
-                  : "flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-all text-on-surface-variant hover:text-on-surface font-headline-sm text-headline-sm"
+                  ? "relative z-10 flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-transform text-on-surface font-headline-sm text-headline-sm"
+                  : "relative z-10 flex-1 min-w-[160px] py-space-sm px-space-md rounded-lg flex items-center justify-center gap-space-xs active:scale-[0.97] transition-all text-on-surface-variant hover:text-on-surface font-headline-sm text-headline-sm"
               }
             >
               <Icon name={t.icon} className="text-secondary text-base" />

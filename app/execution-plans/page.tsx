@@ -16,21 +16,21 @@ export default function ExecutionPlansPage() {
   return (
     <AppShell>
       <div className="w-full px-gutter-desktop py-space-xl max-w-7xl mx-auto flex flex-col gap-space-xl">
-        <div className="flex flex-col gap-space-2xs">
+        <div className="animate-section-in flex flex-col gap-space-2xs">
           <h1 className="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Execution Plans</h1>
           <p className="font-body-md text-body-md text-on-surface-variant">
             Authoritative, human-approved records. Once locked, a plan captures the final decisions, action owners, deadlines, open questions and risks — sourced only from approved items.
           </p>
         </div>
 
-        <div className="flex flex-col gap-space-base">
+        <div className="animate-section-in stagger-1 flex flex-col gap-space-base">
           <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Locked &amp; Approved</h2>
           {locked.length === 0 && (
-            <div className="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
+            <div className="animate-fade-in bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
               No plans have been locked yet. Approve items in a meeting&apos;s Review Workspace, then approve the final plan.
             </div>
           )}
-          {locked.map((m) => {
+          {locked.map((m, idx) => {
             const meetingItems = items.filter((i) => i.meetingId === m.id);
             const counts = itemCounts(meetingItems);
             const approved = meetingItems.filter((i) => i.status === "approved");
@@ -38,7 +38,8 @@ export default function ExecutionPlansPage() {
               <Link
                 key={m.id}
                 href={`/meetings/${m.id}/plan`}
-                className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                className="animate-card-in bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-outline-variant/30 active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
               >
                 <div className="flex items-start gap-space-base">
                   <div className="w-11 h-11 rounded-lg bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0">
@@ -74,16 +75,17 @@ export default function ExecutionPlansPage() {
         </div>
 
         {inProgress.length > 0 && (
-          <div className="flex flex-col gap-space-base">
+          <div className="animate-section-in stagger-2 flex flex-col gap-space-base">
             <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Awaiting Sign-Off</h2>
-            {inProgress.map((m) => {
+            {inProgress.map((m, idx) => {
               const meetingItems = items.filter((i) => i.meetingId === m.id);
               const counts = itemCounts(meetingItems);
               return (
                 <Link
                   key={m.id}
                   href={`/meetings/${m.id}/review`}
-                  className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                  className="animate-card-in bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-outline-variant/30 active:scale-[0.995] transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-space-base group"
+                  style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}
                 >
                   <div className="flex items-start gap-space-base">
                     <div className="w-11 h-11 rounded-lg bg-error-container flex items-center justify-center text-on-error-container shrink-0">

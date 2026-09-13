@@ -126,7 +126,7 @@ export default function ProcessingPage() {
   return (
     <AppShell>
       <div className="px-space-xl py-space-lg flex flex-col gap-space-lg max-w-7xl mx-auto w-full">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
+        <div className="animate-section-in flex flex-col sm:flex-row sm:items-center justify-between gap-space-sm">
           <div className="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant flex-wrap">
             <Link href="/dashboard" className="hover:text-primary transition-colors flex items-center gap-space-2xs">
               <Icon name="grid_view" className="text-base" />
@@ -150,7 +150,7 @@ export default function ProcessingPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
           <div className="lg:col-span-7 flex flex-col gap-space-lg">
-            <div className="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md relative overflow-hidden">
+            <div className="animate-section-in stagger-1 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md relative overflow-hidden">
               <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
               <div className="flex items-start gap-space-md">
                 <div className="relative w-12 h-12 flex items-center justify-center shrink-0">
@@ -197,7 +197,7 @@ export default function ProcessingPage() {
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
+            <div className="animate-section-in stagger-2 bg-surface-container-lowest p-space-xl rounded-xl shadow-sm flex flex-col gap-space-md">
               <div className="flex items-center justify-between pb-space-xs">
                 <h2 className="font-headline-sm text-headline-sm text-on-surface flex items-center gap-space-xs">
                   <Icon name="schema" className="text-secondary text-lg" />
@@ -215,24 +215,26 @@ export default function ProcessingPage() {
                       key={step.title}
                       className={
                         state === "active"
-                          ? "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-high/80 shadow-sm relative overflow-hidden"
+                          ? "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-high/80 shadow-sm relative overflow-hidden transition-colors duration-300"
                           : state === "done"
-                          ? "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low/60 transition-colors"
-                          : "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-lowest opacity-75"
+                          ? "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-low/60 transition-colors duration-300"
+                          : "flex items-start gap-space-md p-space-md rounded-lg bg-surface-container-lowest opacity-75 transition-opacity duration-300"
                       }
                     >
-                      {state === "active" && <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary" />}
+                      {state === "active" && (
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-secondary origin-top animate-pop-in" />
+                      )}
                       <div
                         className={
                           state === "done"
-                            ? "w-7 h-7 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0 mt-0.5"
+                            ? "w-7 h-7 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shrink-0 mt-0.5 transition-colors duration-300"
                             : state === "active"
-                            ? "w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-on-secondary shrink-0 mt-0.5 shadow-sm"
-                            : "w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-outline shrink-0 mt-0.5"
+                            ? "w-7 h-7 rounded-full bg-secondary flex items-center justify-center text-on-secondary shrink-0 mt-0.5 shadow-sm transition-colors duration-300"
+                            : "w-7 h-7 rounded-full bg-surface-container-high flex items-center justify-center text-outline shrink-0 mt-0.5 transition-colors duration-300"
                         }
                       >
                         {state === "done" ? (
-                          <Icon name="check" className="text-base font-bold" />
+                          <Icon name="check" className="text-base font-bold animate-pop-in" />
                         ) : state === "active" ? (
                           <span className="w-2.5 h-2.5 rounded-full bg-on-secondary animate-pulse" />
                         ) : (

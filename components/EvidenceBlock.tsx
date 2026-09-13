@@ -14,7 +14,7 @@ export function EvidenceBlock({
   const iconColor = accent === "error" ? "text-error" : accent === "secondary" ? "text-secondary" : "text-primary";
 
   return (
-    <div className="bg-surface-container-low p-space-md rounded-lg mb-space-md pl-space-lg relative">
+    <div className="bg-surface-container-low hover:bg-surface-container p-space-md rounded-lg mb-space-md pl-space-lg relative transition-colors duration-200">
       <div className={`absolute left-0 top-0 bottom-0 w-1 ${bar} rounded-l`} />
       <div className="flex items-start gap-space-sm">
         <Icon name="format_quote" className={`${iconColor} text-base mt-0.5`} />
@@ -29,7 +29,7 @@ export function EvidenceBlock({
               <button
                 type="button"
                 onClick={() => onViewInTranscript(evidence.turnIds[0])}
-                className="quote-sync-btn flex items-center gap-space-2xs text-secondary hover:text-on-secondary-fixed font-label-sm text-label-sm group"
+                className="quote-sync-btn flex items-center gap-space-2xs text-secondary hover:text-on-secondary-fixed hover:underline underline-offset-2 transition-colors duration-150 font-label-sm text-label-sm group active:scale-[0.97]"
               >
                 <span>View in transcript</span>
                 <Icon name="arrow_forward" className="text-xs group-hover:translate-x-0.5 transition-transform" />

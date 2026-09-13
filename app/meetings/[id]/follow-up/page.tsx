@@ -105,7 +105,7 @@ export default function FollowUpPage() {
       </div>
 
       <div className="w-full px-gutter-desktop py-space-lg max-w-7xl mx-auto flex flex-col gap-space-lg">
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
+        <div className="animate-section-in flex flex-col lg:flex-row lg:items-end justify-between gap-space-lg">
           <div className="flex flex-col gap-space-xs max-w-3xl">
             <div className="flex items-center gap-space-sm">
               <span className="px-space-sm py-space-2xs bg-primary-container text-on-primary-container font-label-sm text-label-sm rounded uppercase tracking-wider font-semibold">Post-Meeting Synthesis</span>
@@ -165,7 +165,7 @@ export default function FollowUpPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+        <div className="animate-section-in stagger-1 grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
           {/* LEFT: Inclusion Matrix */}
           <div className="lg:col-span-5 xl:col-span-4 flex flex-col gap-space-base">
             <div className="bg-surface-container-lowest rounded-lg p-space-lg shadow-sm flex flex-col gap-space-md">
@@ -186,6 +186,7 @@ export default function FollowUpPage() {
                   checked={config.includeDecisions}
                   onChange={(v) => updateConfig({ includeDecisions: v })}
                   hint={sections.decisions[0]?.title ?? "None approved yet"}
+                  delayMs={0}
                 />
                 <InclusionRow
                   label="Assigned Action Items"
@@ -193,6 +194,7 @@ export default function FollowUpPage() {
                   checked={config.includeActions}
                   onChange={(v) => updateConfig({ includeActions: v })}
                   hint="Owners & deadlines attached"
+                  delayMs={40}
                 />
                 <InclusionRow
                   label="Open Questions Needing Input"
@@ -200,6 +202,7 @@ export default function FollowUpPage() {
                   checked={config.includeQuestions}
                   onChange={(v) => updateConfig({ includeQuestions: v })}
                   hint={sections.questions[0]?.title ?? "None approved yet"}
+                  delayMs={80}
                 />
                 <InclusionRow
                   label="Internal Blocker / Risk Note"
@@ -208,6 +211,7 @@ export default function FollowUpPage() {
                   onChange={(v) => updateConfig({ includeRisks: v })}
                   hint="Optional — appended for internal recipients"
                   optional
+                  delayMs={120}
                 />
               </div>
             </div>
@@ -395,6 +399,7 @@ function InclusionRow({
   onChange,
   hint,
   optional,
+  delayMs = 0,
 }: {
   label: string;
   count: number;
@@ -402,9 +407,13 @@ function InclusionRow({
   onChange: (v: boolean) => void;
   hint: string;
   optional?: boolean;
+  delayMs?: number;
 }) {
   return (
-    <label className="flex items-start gap-space-sm p-space-sm bg-surface-container-low hover:bg-surface-container rounded cursor-pointer transition-colors">
+    <label
+      className="animate-badge-in flex items-start gap-space-sm p-space-sm bg-surface-container-low hover:bg-surface-container rounded cursor-pointer transition-colors"
+      style={{ animationDelay: `${delayMs}ms` }}
+    >
       <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="mt-1 w-4 h-4 rounded text-primary focus:ring-primary accent-primary cursor-pointer" />
       <div className="flex flex-col min-w-0 flex-1">
         <div className="flex items-center justify-between">

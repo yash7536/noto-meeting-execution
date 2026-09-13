@@ -8,7 +8,7 @@ import { useToastStore } from "@/lib/toast";
  * always visible regardless of which panel triggered it. */
 export function ToastHost() {
   const toasts = useToastStore((s) => s.toasts);
-  const dismiss = useToastStore((s) => s.dismiss);
+  const beginDismiss = useToastStore((s) => s.beginDismiss);
 
   if (toasts.length === 0) return null;
 
@@ -18,8 +18,10 @@ export function ToastHost() {
         <div
           key={t.id}
           role="status"
-          onClick={() => dismiss(t.id)}
-          className={`pointer-events-auto cursor-pointer flex items-center gap-space-sm px-space-base py-space-md rounded-lg shadow-xl animate-toast-in ${
+          onClick={() => beginDismiss(t.id)}
+          className={`pointer-events-auto cursor-pointer flex items-center gap-space-sm px-space-base py-space-md rounded-lg shadow-xl ${
+            t.leaving ? "animate-toast-out" : "animate-toast-in"
+          } ${
             t.tone === "error"
               ? "bg-error text-on-error"
               : "bg-inverse-surface text-inverse-on-surface"

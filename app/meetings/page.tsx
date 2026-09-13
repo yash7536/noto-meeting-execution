@@ -20,7 +20,7 @@ export default function MeetingsPage() {
   return (
     <AppShell>
       <div className="w-full px-gutter-desktop py-space-xl max-w-7xl mx-auto flex flex-col gap-space-lg">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+        <div className="animate-section-in flex flex-col md:flex-row md:items-center justify-between gap-space-md">
           <div className="flex flex-col gap-space-2xs">
             <h1 className="font-display-lg text-display-lg text-on-surface font-bold tracking-tight">Meetings</h1>
             <p className="font-body-md text-body-md text-on-surface-variant">Every transcript ingested into the pipeline, with live execution status.</p>
@@ -30,7 +30,7 @@ export default function MeetingsPage() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              className="w-full pl-9 pr-space-md py-2 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low shadow-sm transition-all"
+              className="w-full pl-9 pr-space-md py-2 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-low shadow-sm transition-all"
               placeholder="Search meetings or teams..."
             />
           </div>
@@ -38,12 +38,14 @@ export default function MeetingsPage() {
 
         <div className="flex flex-col gap-space-sm">
           {filtered.length === 0 && (
-            <div className="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
+            <div className="animate-fade-in bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
               No meetings match &ldquo;{query}&rdquo;.
             </div>
           )}
-          {filtered.map((m) => (
-            <MeetingRow key={m.id} meeting={m} allItems={items.filter((i) => i.meetingId === m.id)} />
+          {filtered.map((m, idx) => (
+            <div key={m.id} className="animate-card-in" style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}>
+              <MeetingRow meeting={m} allItems={items.filter((i) => i.meetingId === m.id)} />
+            </div>
           ))}
         </div>
       </div>

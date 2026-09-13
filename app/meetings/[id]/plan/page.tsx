@@ -83,7 +83,7 @@ export default function ApprovedPlanPage() {
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-tertiary-fixed-dim/15 rounded-full blur-3xl pointer-events-none -z-10" />
         <div className="absolute top-48 left-10 w-80 h-80 bg-primary-fixed-dim/20 rounded-full blur-3xl pointer-events-none -z-10" />
         <div className="max-w-7xl mx-auto px-gutter-desktop py-space-xl flex flex-col gap-space-xl">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+          <div className="animate-section-in flex flex-col md:flex-row md:items-center justify-between gap-space-md">
             <nav aria-label="Breadcrumb" className="flex items-center gap-space-xs font-label-md text-label-md text-on-surface-variant flex-wrap">
               <Link href="/dashboard" className="hover:text-primary transition-colors">Dashboard</Link>
               <Icon name="chevron_right" className="text-sm text-outline" />
@@ -102,11 +102,11 @@ export default function ApprovedPlanPage() {
             </div>
           </div>
 
-          <div className="relative bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+          <div className="animate-section-in stagger-1 relative bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
             <div className="h-1 w-full bg-gradient-to-r from-tertiary via-on-tertiary-container to-secondary" />
             <div className="p-space-lg flex flex-col lg:flex-row lg:items-center justify-between gap-space-lg">
               <div className="flex items-start gap-space-md">
-                <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0 shadow-sm">
+                <div className="w-12 h-12 rounded-xl bg-tertiary-fixed flex items-center justify-center text-tertiary-container shrink-0 shadow-sm animate-pop-in">
                   <Icon name="task_alt" className="text-2xl" filled />
                 </div>
                 <div className="flex flex-col gap-space-2xs">
@@ -180,7 +180,7 @@ export default function ApprovedPlanPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
+          <div className="animate-section-in stagger-2 grid grid-cols-1 lg:grid-cols-12 gap-space-xl items-start">
             <div className="lg:col-span-8 flex flex-col gap-space-xl">
               <PlanSection title="1. Decisions (Locked & Authoritative)" tag={`${decisions.length} ARCHITECTURAL COMMIT${decisions.length === 1 ? "" : "S"}`} dot="bg-primary">
                 {decisions.length === 0 && <EmptySection label="No decisions were approved for this meeting." />}

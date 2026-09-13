@@ -5,7 +5,9 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/AppShell";
 import { Icon } from "@/components/Icon";
+import { CountUp } from "@/components/CountUp";
 import { useCopilotStore, itemCounts } from "@/lib/store";
+import { useSlidingIndicator } from "@/lib/useSlidingIndicator";
 import { formatShortDate } from "@/lib/format";
 import type { ExecutionItem, Meeting } from "@/lib/types";
 
@@ -31,6 +33,7 @@ export default function DashboardPage() {
   const items = useCopilotStore((s) => s.items);
   const [filter, setFilter] = useState<(typeof FILTERS)[number]["key"]>("all");
   const [query, setQuery] = useState("");
+  const { containerRef: filterTabsRef, style: filterIndicator } = useSlidingIndicator(filter);
 
   const counts = itemCounts(items);
   const approvedExported = items.filter((i) => i.status === "approved").length;
@@ -55,7 +58,7 @@ export default function DashboardPage() {
       <div className="flex flex-col w-full">
         <div className="w-full px-gutter-desktop py-space-xl flex flex-col gap-space-2xl">
           {/* Top Heroic Context Strip */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-space-lg bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden">
+          <div className="animate-section-in flex flex-col md:flex-row md:items-end justify-between gap-space-lg bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden">
             <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary-container/5 pointer-events-none blur-3xl" />
             <div className="flex flex-col gap-space-xs max-w-3xl z-10">
               <div className="flex items-center gap-space-sm mb-space-2xs">
@@ -90,9 +93,11 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Metric Overview Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-base">
-            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+          {/* Metric Overview Cards — purely informational (no click action),
+              so they get a settle-in entrance but no hover/press affordance
+              that would falsely suggest they're interactive. */}
+          <div className="animate-section-in stagger-1 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-base">
+            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative overflow-hidden group">
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Meetings Processed</span>
                 <div className="p-space-2xs bg-surface-container rounded text-primary">
@@ -100,7 +105,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="my-space-md flex items-baseline gap-space-sm">
-                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight">{meetings.length}</span>
+                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight"><CountUp value={meetings.length} /></span>
                 <span className="inline-flex items-center gap-space-2xs font-mono-metric text-mono-metric px-space-xs py-space-2xs bg-surface-container-low text-primary rounded">
                   <Icon name="trending_up" className="text-sm" />
                   {needsReviewCount} awaiting review
@@ -108,13 +113,13 @@ export default function DashboardPage() {
               </div>
               <div className="flex items-center gap-space-xs">
                 <div className="w-full bg-surface-container-high h-1.5 rounded-full overflow-hidden">
-                  <div className="bg-primary h-full rounded-full" style={{ width: `${Math.min(100, (approvedCount / Math.max(1, meetings.length)) * 100)}%` }} />
+                  <div className="bg-primary h-full rounded-full transition-[width] duration-700 ease-out" style={{ width: `${Math.min(100, (approvedCount / Math.max(1, meetings.length)) * 100)}%` }} />
                 </div>
                 <span className="font-mono-code text-mono-code text-outline shrink-0">{approvedCount}/{meetings.length} closed</span>
               </div>
             </div>
 
-            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
+            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative overflow-hidden group">
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Execution Items Extracted</span>
                 <div className="p-space-2xs bg-surface-container rounded text-secondary">
@@ -122,7 +127,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="my-space-md flex items-baseline gap-space-sm">
-                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight">{items.length}</span>
+                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight"><CountUp value={items.length} /></span>
                 <span className="inline-flex items-center gap-space-2xs font-mono-metric text-mono-metric px-space-xs py-space-2xs bg-surface-container-low text-secondary font-medium rounded">
                   {Math.round((counts.ready.length / Math.max(1, items.length)) * 100)}% verified rate
                 </span>
@@ -133,16 +138,13 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Needs Review</span>
-                <span className="flex h-2.5 w-2.5 relative">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error-container opacity-75" />
-                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error" />
-                </span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error animate-pop-in" />
               </div>
               <div className="my-space-md flex items-baseline gap-space-sm">
-                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight">{counts.needsReview.length}</span>
+                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight"><CountUp value={counts.needsReview.length} /></span>
                 <span className="inline-flex items-center gap-space-2xs px-space-xs py-space-2xs bg-error-container text-on-error-container font-label-sm text-label-sm rounded font-bold uppercase">
                   Human Sign-Off
                 </span>
@@ -152,7 +154,7 @@ export default function DashboardPage() {
               </p>
             </div>
 
-            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div className="flex flex-col justify-between bg-surface-container-lowest p-space-lg rounded-xl shadow-sm relative overflow-hidden">
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Approved &amp; Exported</span>
                 <div className="p-space-2xs bg-surface-container-low rounded text-tertiary">
@@ -160,7 +162,7 @@ export default function DashboardPage() {
                 </div>
               </div>
               <div className="my-space-md flex items-baseline gap-space-sm">
-                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight">{approvedExported}</span>
+                <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight"><CountUp value={approvedExported} /></span>
                 <span className="inline-flex items-center gap-space-2xs px-space-xs py-space-2xs bg-surface-container-low text-tertiary font-label-sm text-label-sm rounded font-semibold">
                   <Icon name="done_all" className="text-sm text-tertiary" />
                   Synced
@@ -173,7 +175,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Meetings Synthesis Registry Section */}
-          <div className="flex flex-col gap-space-base">
+          <div className="animate-section-in stagger-2 flex flex-col gap-space-base">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-space-base pb-space-sm">
               <div className="flex items-center gap-space-md">
                 <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
@@ -184,15 +186,20 @@ export default function DashboardPage() {
                 </span>
               </div>
               <div className="flex flex-wrap items-center gap-space-md">
-                <div className="inline-flex p-1 bg-surface-container rounded-lg gap-1">
+                <div ref={filterTabsRef} className="relative inline-flex p-1 bg-surface-container rounded-lg gap-1">
+                  <div
+                    className="absolute rounded shadow-sm bg-surface-container-lowest transition-all duration-300 ease-out"
+                    style={{ left: filterIndicator.left, width: filterIndicator.width, top: 4, bottom: 4, opacity: filterIndicator.ready ? 1 : 0 }}
+                  />
                   {FILTERS.map((f) => (
                     <button
                       key={f.key}
+                      data-tab-key={f.key}
                       onClick={() => setFilter(f.key)}
                       className={
                         filter === f.key
-                          ? "px-space-md py-space-xs bg-surface-container-lowest text-on-surface font-label-md text-label-md rounded shadow-sm font-semibold transition-all"
-                          : "px-space-md py-space-xs text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded transition-colors flex items-center gap-1"
+                          ? "relative z-10 px-space-md py-space-xs text-on-surface font-label-md text-label-md rounded font-semibold active:scale-[0.97] transition-transform"
+                          : "relative z-10 px-space-md py-space-xs text-on-surface-variant hover:text-on-surface font-label-md text-label-md rounded active:scale-[0.97] transition-all flex items-center gap-1"
                       }
                     >
                       {f.label}
@@ -204,7 +211,7 @@ export default function DashboardPage() {
                   <input
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    className="w-full pl-9 pr-space-md py-1.5 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:bg-surface-container-low shadow-sm transition-all"
+                    className="w-full pl-9 pr-space-md py-1.5 bg-surface-container-lowest rounded-lg font-body-sm text-body-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20 focus:bg-surface-container-low shadow-sm transition-all"
                     placeholder="Filter decisions, tags..."
                     type="text"
                   />
@@ -212,14 +219,16 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            <div className="flex flex-col gap-space-sm">
+            <div key={filter} className="flex flex-col gap-space-sm">
               {filteredMeetings.length === 0 && (
-                <div className="bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
+                <div className="animate-fade-in bg-surface-container-lowest p-space-xl rounded-xl shadow-sm text-center text-on-surface-variant font-body-md text-body-md">
                   No meetings match this filter yet.
                 </div>
               )}
-              {filteredMeetings.map((m) => (
-                <MeetingRow key={m.id} meeting={m} allItems={items.filter((i) => i.meetingId === m.id)} />
+              {filteredMeetings.map((m, idx) => (
+                <div key={m.id} className="animate-card-in" style={{ animationDelay: `${Math.min(idx, 8) * 40}ms` }}>
+                  <MeetingRow meeting={m} allItems={items.filter((i) => i.meetingId === m.id)} />
+                </div>
               ))}
             </div>
           </div>
@@ -284,7 +293,7 @@ export function MeetingRow({ meeting, allItems }: { meeting: Meeting; allItems: 
           goToMeeting();
         }
       }}
-      className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md active:scale-[0.995] transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-space-base group cursor-pointer"
+      className="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm hover:shadow-md border border-transparent hover:border-outline-variant/30 active:scale-[0.995] transition-all flex flex-col xl:flex-row xl:items-center justify-between gap-space-base group cursor-pointer"
     >
       <div className="flex items-start gap-space-base max-w-xl">
         <div className={`p-space-sm ${meta.iconWrap} rounded-lg ${meta.iconColor} mt-1 shrink-0`}>
