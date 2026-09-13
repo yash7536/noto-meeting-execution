@@ -161,6 +161,8 @@ Verified against `package.json`:
 - **localStorage** for persistence (this is a client-side demo app — no database)
 - **Vitest** for the regression test suite
 
+**Interaction & motion:** small, deliberate CSS-only animation system (`app/globals.css`) — entrance/stagger keyframes, a sliding tab indicator, a two-phase toast, a reusable count-up number component — plus a collapsible, persisted sidebar. Everything respects `prefers-reduced-motion`.
+
 ## Project Structure
 
 ```
