@@ -2,7 +2,9 @@
 
 **Turn meetings into action.**
 
-Noto takes a messy meeting transcript and turns it into a structured, reviewable execution plan — decisions, action items, owners, deadlines, open questions, and risks, each tied back to the exact line in the transcript it came from. I built it as an AI Product Management portfolio project, and this README is my honest writeup of what it does, how it's built, what I evaluated, and what I got wrong along the way.
+Noto turns messy meeting transcripts into evidence-backed, reviewable execution plans — with humans approving what becomes authoritative. Every decision, action item, owner, deadline, open question, and risk is tied back to the exact line in the transcript it came from. I built it as an AI Product Management portfolio project, and this README is my honest writeup of what it does, how it's built, what I evaluated, and what I got wrong along the way.
+
+**🔗 Live Demo:** [noto-meeting-execution.vercel.app](https://noto-meeting-execution.vercel.app/) · **Repo:** [github.com/yash7536/noto-meeting-execution](https://github.com/yash7536/noto-meeting-execution)
 
 ## The Problem
 
@@ -26,6 +28,15 @@ One thing I want to be upfront about: **Jira and Notion are copy-ready outputs, 
 ## The Core Idea
 
 **AI proposes. The system validates. A human approves.**
+
+That principle breaks down into a few concrete rules the product actually enforces:
+
+- No invented owners, deadlines, or decisions — if it isn't grounded in the transcript, it doesn't get asserted as fact.
+- Evidence is first-class — every item carries the exact quote it came from, not a paraphrase.
+- Uncertainty is surfaced, not resolved for you — unclear owners and vague deadlines get flagged, not guessed.
+- Conflicts are preserved — when two people disagree, both positions are shown, not one silently picked.
+- Superseded decisions retain history — a reversed decision keeps a link to what it replaced, not just the final answer.
+- Exports only use approved items — nothing reaches the follow-up email, plan, or Jira/Notion output without a human approving it first.
 
 The Gemini call in this app is a candidate generator, not an authority. It's never allowed to decide status, ownership, or approval on its own — those get computed by deterministic code that checks the model's output against the actual transcript. I did it this way because an LLM extracting structured facts from a conversation will occasionally be wrong in ways that look completely reasonable on the surface, and the cost of a wrong "decision" or a made-up owner showing up in a real execution plan is a lot higher than the cost of asking a human to confirm it. Human review isn't a fallback for when the AI fails — it's a required step for anything that leaves this system.
 
@@ -56,14 +67,13 @@ Transcript
 
 ```mermaid
 flowchart TD
-    A[Transcript] --> B[Transcript Parsing]
-    B --> C[AI Candidate Extraction]
+    A[Messy Transcript] --> B[AI Extraction]
+    B --> C[Evidence / Source Quotes]
     C --> D[Deterministic Validation]
-    D --> E[Evidence Verification]
-    E --> F[Ambiguity / Conflict / Supersession Detection]
-    F --> G[Human Review]
-    G --> H[Approved Execution Plan]
-    H --> I[Email / Jira / Notion Output]
+    D --> E[Ambiguity + Conflict Detection]
+    E --> F[Human Review]
+    F --> G[Approved Execution Items]
+    G --> H[Email / Jira / Notion]
 ```
 
 ## AI Architecture
@@ -83,6 +93,8 @@ I want to be precise about what this actually guarantees. It does **not** guaran
 
 Every piece of the UI downstream — the review screen, the plan view, the exports — reads from the same shared `ExecutionItem` type. Whether an item came from the AI path or the deterministic fallback, it looks identical to everything after extraction, which is what keeps the review and export logic simple.
 
+For the full AI/deterministic/human responsibility breakdown and every guardrail in detail, see [`docs/AI-SYSTEM-DESIGN.md`](docs/AI-SYSTEM-DESIGN.md).
+
 ## Human-in-the-Loop
 
 Every extracted item moves through the same lifecycle:
@@ -95,9 +107,19 @@ Only items with `status: approved` are allowed to flow into the approved executi
 
 ## Evaluation
 
-I ran a real evaluation against a frozen gold-set of 18 meeting transcripts with 54 hand-labeled ground-truth items — not a vibe check, an actual precision/recall pass against real Gemini output through the production pipeline described above.
+I ran a real evaluation against a frozen gold-set of 18 meeting transcripts with 54 hand-labeled ground-truth items — not a vibe check, an actual precision/recall pass, in two stages.
 
-**Baseline production evaluation (18 transcripts, 54 ground-truth items):**
+**Stage 1 — controlled experiment (prompt-only, not the deployed product).** Before building the product's deterministic validation layer, I ran three prompt-only conditions directly against the Gemini API — no evidence checking, no guardrails, no fallback engine — to see how much of the accuracy gain was actually coming from prompting versus from the deterministic layer:
+
+| Version | Precision | Recall | F1 | Correct | Output | False Positives |
+|---|---:|---:|---:|---:|---:|---:|
+| C1 — Baseline prompt | 61.2% | 75.9% | 67.8% | 41 | 67 | 26 |
+| C2 — + Evidence requirement | 65.1% | 75.9% | 70.1% | 41 | 63 | 22 |
+| C3 — + Evidence + Guardrails | 71.9% | 85.2% | 78.0% | 46 | 64 | 18 |
+
+C3 vs. C1: **+10.4pp precision, +9.3pp recall, +10.2pp F1, 8 fewer false positives.** This is what motivated moving guardrail logic out of the prompt and into deterministic code rather than trying to prompt-engineer my way to reliability — a better prompt helped, but a real validation layer helped more.
+
+**Stage 2 — production evaluation, through the actual deployed pipeline** (Gemini extraction + deterministic validation + evidence verification, the real app, not a prompt-only condition), 18/18 transcripts complete:
 
 | Metric | Result |
 |---|---|
@@ -118,9 +140,9 @@ A few honest notes on these numbers: supersession handling being 0/4 in this run
 
 ### Preference vs. Decision
 
-Real user testing surfaced a genuine failure: the system could sometimes treat a preference or a proposal as if it were a finalized decision. For example, one person would say they preferred option A, another would say they preferred option B, and someone would explicitly say they wanted to test both before deciding — and the extraction would occasionally still produce a "decision" for whichever option was mentioned last.
+Real user testing surfaced a genuine failure: the system could sometimes treat a preference or a proposal as if it were a finalized decision. The specific case that exposed it: in one test meeting, Sara said she preferred a 15-minute slot, Devraj said he preferred 5 minutes, and Marcus said they should test both before deciding anything — and the extraction still produced a "decision" for whichever option got mentioned most recently, instead of recognizing that nothing had actually been decided.
 
-That's a meaningfully bad failure mode for a product whose entire pitch is "don't invent information." I added a deterministic guardrail layer that checks decision candidates against tentative language ("I'd prefer," "maybe," "I think we should") and explicit deferral language ("let's decide after legal signs off," "before deciding") — if either shows up without a genuinely decisive statement overriding it, the item gets demoted from a decision to an open question instead of being fabricated as settled.
+That's a meaningfully bad failure mode for a product whose entire pitch is "don't invent information." The underlying insight: **a preference, proposal, or discussion point is not necessarily a decision** — and a system that can't tell the difference will confidently fabricate consensus that never happened. I added a deterministic guardrail layer that checks decision candidates against tentative language ("I'd prefer," "maybe," "I think we should") and explicit deferral language ("let's decide after legal signs off," "before deciding") — if either shows up without a genuinely decisive statement overriding it, the item gets demoted from a decision to an open question instead of being fabricated as settled.
 
 After that change: 41/41 regression tests passed, and the specific failure cases from user testing passed on targeted retest. I have not run a new full 18-transcript production accuracy score against this change, so I'm not claiming a new headline number here — just that the specific bug is fixed and covered by tests going forward.
 
@@ -134,7 +156,16 @@ When two people take opposing positions on the same topic and the meeting doesn'
 
 ## Real User Testing
 
-I had 8 real people test Noto — people working in college club coordination, student projects, software development, and early-stage startup teams. This wasn't 8 unique scripted scenarios or 8 different pre-written transcripts; it was real people using the app on their own meetings and workflows. That testing is what surfaced the preference-vs-decision bug described above, which led to the guardrail fix, the regression test suite, and a targeted retest of the original failure cases.
+I ran exploratory usability testing with 8 real people — not a statistically significant study, just real users clicking through the actual product:
+
+- 3 college club coordinators
+- 2 project students
+- 1 software developer
+- 2 startup team members
+
+Worth being precise about the methodology: this wasn't 8 independently-designed scenarios. Some testers — including within the club-coordinator group — worked from the same starting transcript rather than each bringing a fully separate real meeting. But the reactions, confusion, and the failure below all came from real people actually using the product, not from me testing my own app. Full findings, organized as observation → impact → product response, are in [`docs/USER-RESEARCH.md`](docs/USER-RESEARCH.md).
+
+That testing is what surfaced the preference-vs-decision bug described above, which led to the guardrail fix, the regression test suite, and a targeted retest of the original failure cases.
 
 ## Business Value
 
@@ -152,14 +183,14 @@ I haven't measured time saved, and I'm not going to put a number on it here — 
 
 Verified against `package.json`:
 
-- **Next.js 16** (App Router, Turbopack)
-- **TypeScript**
+- **Next.js 16.3.4** (App Router, Turbopack)
+- **React 19.2.8**
+- **TypeScript ^5**
 - **Tailwind CSS v4**
-- **React 19**
-- **Gemini API** (`@google/genai`) for the AI extraction step
-- **Zustand** for state management, with `persist` middleware
+- **Gemini API** (`@google/genai` ^2.21.0) for the AI extraction step
+- **Zustand ^5.0.15** for state management, with `persist` middleware
 - **localStorage** for persistence (this is a client-side demo app — no database)
-- **Vitest** for the regression test suite
+- **Vitest ^2.1.9** for the regression test suite
 
 **Interaction & motion:** small, deliberate CSS-only animation system (`app/globals.css`) — entrance/stagger keyframes, a sliding tab indicator, a two-phase toast, a reusable count-up number component — plus a collapsible, persisted sidebar. Everything respects `prefers-reduced-motion`.
 
@@ -234,8 +265,15 @@ Current verified state: 41/41 regression tests pass, typecheck passes with no er
 - No live meeting transcription — you paste in a transcript, Noto doesn't record or transcribe audio.
 - The evaluation dataset (18 transcripts, 54 items) is small. I'd trust the directional signal more than the exact percentages.
 - The evaluation numbers above are from the baseline pipeline, before the preference-vs-decision guardrail fix — they don't reflect that improvement.
-- Ambiguity and supersession detection are rule-based and can still miss edge cases, especially subtly-phrased conflicts or decisions that were only referenced from an earlier, untranscribed meeting.
+- Supersession detection remains brittle for some reversal/reference phrasing — it doesn't reliably catch every way a decision gets walked back.
+- Ambiguity handling can be conservative and over-flag — some items get marked ambiguous that a human would consider clear.
+- Some question-typed items can bypass certain owner-resolution paths (that UI is scoped to action/risk items).
+- Code-switched Hindi-English self-commitments can be missed or misattributed.
+- Sentence fragmentation can occasionally split a single commitment across what the extractor treats as two separate sentences.
+- Risk-type extraction has limited evaluation coverage, because the frozen gold set contains zero risk-type items.
 - Human review is still required for anything that matters. This isn't a "fire and forget" system, and it isn't meant to be.
+
+Full detail, including exact numbers behind each of these, is in [`docs/EVALUATION.md`](docs/EVALUATION.md).
 
 ## Roadmap
 
@@ -247,6 +285,26 @@ Things I'd build next, not things that exist today:
 - Better handling of multilingual and code-switched transcripts (a real gap I found during evaluation — a Hindi-English self-commitment got misattributed).
 - Stronger ambiguity and supersession detection.
 - Team-level analytics across meetings over time.
+
+## Prioritization
+
+If I were sequencing the roadmap above (and the limitations list before it), it's by impact to trust and execution reliability — not by how interesting a feature is to build:
+
+**P0 — Core trust** (the product doesn't mean anything without these): evidence grounding, no invented owners/deadlines, human approval before anything is authoritative, preference-vs-decision detection, conflict surfacing.
+
+**P1 — Accuracy improvements** (make the trusted core more reliable): supersession detection, ambiguity precision (fewer over-flagged items), decision/status accuracy, sentence-fragmentation handling.
+
+**P2 — Expansion** (grow scope once the core is solid): code-switched language robustness, broader risk-type evaluation coverage, live Jira/Notion integrations, a larger and more independent user study.
+
+## Documentation
+
+Deeper product/AI-PM documentation, split out so this README stays readable:
+
+- [`docs/PRD.md`](docs/PRD.md) — problem, target users, requirements, success metrics
+- [`docs/AI-SYSTEM-DESIGN.md`](docs/AI-SYSTEM-DESIGN.md) — the AI/deterministic/human boundary and every guardrail, in detail
+- [`docs/EVALUATION.md`](docs/EVALUATION.md) — full methodology and numbers for both evaluation stages, plus limitations
+- [`docs/USER-RESEARCH.md`](docs/USER-RESEARCH.md) — the 8-user testing round, findings, and the preference-vs-decision failure in full
+- [`docs/PRODUCT-DECISIONS.md`](docs/PRODUCT-DECISIONS.md) — the significant product decisions and why they were made
 
 ## Screenshots / Demo
 
