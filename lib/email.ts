@@ -28,10 +28,10 @@ export function splitBySection(items: ExecutionItem[]): EmailSections {
 export function defaultFollowUpConfig(meeting: Meeting): FollowUpConfig {
   return {
     subject: `[${meeting.title} — ${formatLongDate(meeting.recordedDate)}] Key Decisions, Action Owners & Next Steps`,
-    to: "team@acme.com",
+    to: "team@example.com",
     toLabel: meeting.team,
     from: "Yash",
-    fromRole: "Product Lead · Acme Core",
+    fromRole: "Product Lead",
     includeDecisions: true,
     includeActions: true,
     includeQuestions: true,

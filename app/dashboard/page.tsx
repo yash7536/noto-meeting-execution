@@ -61,13 +61,6 @@ export default function DashboardPage() {
           <div className="animate-section-in flex flex-col md:flex-row md:items-end justify-between gap-space-lg bg-surface-container-lowest p-space-xl rounded-xl shadow-sm relative overflow-hidden">
             <div className="absolute -right-16 -top-16 w-80 h-80 rounded-full bg-primary-container/5 pointer-events-none blur-3xl" />
             <div className="flex flex-col gap-space-xs max-w-3xl z-10">
-              <div className="flex items-center gap-space-sm mb-space-2xs">
-                <span className="inline-flex items-center gap-space-2xs px-space-sm py-space-2xs bg-surface-container-high rounded-full font-mono-metric text-mono-metric text-primary font-semibold">
-                  <span className="w-1.5 h-1.5 rounded-full bg-secondary" />
-                  PIPELINE V2.4 ACTIVATED
-                </span>
-                <span className="font-mono-metric text-mono-metric text-outline">WORKSPACE // ACME-CORE</span>
-              </div>
               <h1 className="font-display-lg text-display-lg text-on-surface font-extrabold tracking-tight">
                 Noto
               </h1>
