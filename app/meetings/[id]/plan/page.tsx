@@ -164,7 +164,7 @@ export default function ApprovedPlanPage() {
                 <span className="font-headline-sm text-headline-sm text-on-surface font-bold mt-0.5">{approved.length} Total Items</span>
               </div>
               <div className="flex flex-col">
-                <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">Acoustic Proof</span>
+                <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">Evidence Grounding</span>
                 <span className="font-headline-sm text-headline-sm text-tertiary font-bold mt-0.5">100% Grounded</span>
               </div>
               <div className="flex flex-col">
@@ -174,8 +174,8 @@ export default function ApprovedPlanPage() {
                 </span>
               </div>
               <div className="flex flex-col">
-                <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">Downstream Sync</span>
-                <span className="font-headline-sm text-headline-sm text-secondary font-bold mt-0.5">{actions.filter((a) => a.targetJira).length} Synced to Jira</span>
+                <span className="font-label-sm text-label-sm text-outline uppercase font-semibold">Downstream Export</span>
+                <span className="font-headline-sm text-headline-sm text-secondary font-bold mt-0.5">{actions.filter((a) => a.targetJira).length} Jira-ready</span>
               </div>
             </div>
           </div>
@@ -266,7 +266,7 @@ export default function ApprovedPlanPage() {
                               <td className="py-space-md px-space-md align-top text-right whitespace-nowrap">
                                 <span className="inline-flex items-center gap-1 px-space-sm py-space-2xs bg-primary-fixed text-on-primary-fixed rounded font-label-sm text-label-sm font-semibold">
                                   <span className="w-1.5 h-1.5 rounded-full bg-primary" />
-                                  {a.targetJira ? a.jiraKey ?? "Queued for Jira" : "Not synced"}
+                                  {a.targetJira ? "Jira-ready" : "Not for Jira"}
                                 </span>
                               </td>
                             </tr>
@@ -381,7 +381,7 @@ export default function ApprovedPlanPage() {
                   </div>
                 </div>
                 <div className="flex flex-col gap-space-sm mt-space-xs font-body-sm text-body-sm">
-                  <PipelineStep n={1} title="Acoustic Diarization" body={`${meeting.durationMinutes}m of transcript ingested from ${meeting.participants.length} speakers.`} />
+                  <PipelineStep n={1} title="Transcript Ingestion" body={`${meeting.durationMinutes}m of transcript ingested with ${meeting.participants.length} speaker labels.`} />
                   <PipelineStep n={2} title="Semantic Extraction" body={`${items.length} candidate commitments mapped.`} />
                   <PipelineStep n={3} title="Lead Sign-Off & Locking" body={`Ratified by ${meeting.approvedBy ?? "Yash"} with zero unreviewed diffs.`} />
                 </div>

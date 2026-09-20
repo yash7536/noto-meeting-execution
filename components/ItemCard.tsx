@@ -389,7 +389,7 @@ export function ItemCard({
             <div className="flex items-center gap-space-xs">
               <span className="font-label-sm text-label-sm text-outline">Target Destination:</span>
               <span className="px-space-xs py-space-2xs bg-surface-container rounded font-mono-code text-mono-code text-on-surface-variant">
-                {item.targetJira ? item.jiraKey ?? "Jira / ENG-Core" : "Not synced"}
+                {item.targetJira ? "Jira-ready" : "Not for Jira"}
               </span>
             </div>
             <div className="flex items-center gap-space-xs">

@@ -271,7 +271,7 @@ export default function ReviewWorkspacePage() {
                     <Icon name="verified" className="text-secondary text-lg" />
                     <h3 className="font-headline-sm text-headline-sm text-on-surface">Source Transcript · Ground Truth</h3>
                   </div>
-                  <span className="px-space-xs py-space-2xs bg-surface-container text-outline font-mono-code text-mono-code rounded">LIVE SYNC</span>
+                  <span className="px-space-xs py-space-2xs bg-surface-container text-outline font-mono-code text-mono-code rounded">LINKED TO EVIDENCE</span>
                 </div>
                 <div className="relative my-space-sm">
                   <Icon name="search" className="absolute left-space-sm top-1/2 -translate-y-1/2 text-outline text-base" />

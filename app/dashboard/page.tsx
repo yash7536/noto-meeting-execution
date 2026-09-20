@@ -17,7 +17,7 @@ const STATUS_META: Record<
 > = {
   processing: { label: "Processing", dot: "bg-secondary", icon: "sync", iconWrap: "bg-surface-container", iconColor: "text-secondary" },
   needs_review: { label: "Needs Review", dot: "bg-error", icon: "forum", iconWrap: "bg-primary/5", iconColor: "text-primary" },
-  reviewed_synced: { label: "Reviewed & Synced", dot: "bg-tertiary", icon: "account_tree", iconWrap: "bg-surface-container", iconColor: "text-secondary" },
+  reviewed_synced: { label: "Jira / Notion ready", dot: "bg-tertiary", icon: "account_tree", iconWrap: "bg-surface-container", iconColor: "text-secondary" },
   approved: { label: "Approved", dot: "bg-tertiary", icon: "support_agent", iconWrap: "bg-surface-container-low", iconColor: "text-primary" },
 };
 
@@ -158,11 +158,11 @@ export default function DashboardPage() {
                 <span className="font-display-lg text-display-lg font-bold text-on-surface tracking-tight"><CountUp value={approvedExported} /></span>
                 <span className="inline-flex items-center gap-space-2xs px-space-xs py-space-2xs bg-surface-container-low text-tertiary font-label-sm text-label-sm rounded font-semibold">
                   <Icon name="done_all" className="text-sm text-tertiary" />
-                  Synced
+                  Copy-ready
                 </span>
               </div>
               <p className="font-body-sm text-body-sm text-on-surface-variant line-clamp-1">
-                Synced to Jira, Notion, &amp; executive debriefs
+                Jira / Notion formats &amp; executive debriefs ready to copy
               </p>
             </div>
           </div>
@@ -234,10 +234,10 @@ export default function DashboardPage() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-space-base relative">
               {[
-                { step: "STEP 01", icon: "upload_file", color: "text-primary", title: "Ingest Dialogue", body: "Paste or upload any messy transcript or live audio stream directly into the pipeline buffer." },
+                { step: "STEP 01", icon: "upload_file", color: "text-primary", title: "Ingest Dialogue", body: "Paste or upload any messy meeting transcript (.vtt or .txt) to start the pipeline." },
                 { step: "STEP 02", icon: "psychology", color: "text-secondary", title: "Extract & Ground", body: "Deterministic models extract decisions, actions, conflicts, and link exact timestamped quotes." },
                 { step: "STEP 03", icon: "rule", color: "text-error", title: "Resolve Ambiguities", body: "Human-in-the-loop review checks missing owners, flags disagreements, and solidifies deadlines." },
-                { step: "STEP 04", icon: "rocket_launch", color: "text-tertiary", title: "Execute & Sync", body: "Copy instant post-meeting briefs, auto-file Jira/Linear tickets, or sync cleanly to Notion workspaces." },
+                { step: "STEP 04", icon: "rocket_launch", color: "text-tertiary", title: "Copy & Export", body: "Copy post-meeting briefs, plus Jira and Notion execution formats, into your own tools." },
               ].map((s) => (
                 <div key={s.step} className="bg-surface-container-lowest p-space-md rounded-lg flex flex-col gap-space-xs relative shadow-sm">
                   <div className="flex items-center justify-between">
@@ -338,11 +338,11 @@ export function MeetingRow({ meeting, allItems }: { meeting: Meeting; allItems: 
               <div className="flex items-center gap-space-xs">
                 <span className="inline-flex items-center gap-space-2xs font-body-sm text-body-sm text-on-surface font-medium">
                   <Icon name="check_circle" className="text-base text-tertiary-container" />
-                  {meeting.status === "approved" ? "Reviewed · Follow-up sent to attendees" : "All items resolved · 100% human approved"}
+                  {meeting.status === "approved" ? "Reviewed · Follow-up email ready to copy" : "All items resolved · 100% human approved"}
                 </span>
               </div>
               <span className="font-mono-code text-mono-code text-outline">
-                {meeting.status === "approved" ? "Executive summary ready to share" : "Ready to sync to Jira & Notion"}
+                {meeting.status === "approved" ? "Executive summary ready to share" : "Copy-ready Jira & Notion formats"}
               </span>
             </>
           )}

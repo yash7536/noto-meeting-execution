@@ -275,13 +275,13 @@ export function EditDrawer({
 
           {/* Targets */}
           <div className="flex flex-col gap-space-xs">
-            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Target Integration Pipeline</label>
+            <label className="font-label-sm text-label-sm text-outline uppercase tracking-wider font-semibold">Export targets</label>
             <div className="flex flex-col gap-space-xs bg-surface-container-low p-space-md rounded-xl">
               <label className="flex items-start gap-space-sm cursor-pointer select-none p-space-xs hover:bg-surface-container rounded-lg transition-colors">
                 <input type="checkbox" checked={targetJira} onChange={(e) => setTargetJira(e.target.checked)} className="mt-1 rounded-md accent-primary h-4 w-4" />
                 <div className="flex flex-col">
-                  <span className="font-body-md text-body-md text-on-surface font-semibold">Queue for Jira issue creation</span>
-                  <span className="font-body-sm text-body-sm text-outline">Will sync as an issue once the plan is approved.</span>
+                  <span className="font-body-md text-body-md text-on-surface font-semibold">Include in Jira export</span>
+                  <span className="font-body-sm text-body-sm text-outline">Added to the copy-ready Jira ticket format once the plan is approved.</span>
                 </div>
               </label>
               <label className="flex items-start gap-space-sm cursor-pointer select-none p-space-xs hover:bg-surface-container rounded-lg transition-colors">
@@ -294,8 +294,8 @@ export function EditDrawer({
               <label className="flex items-start gap-space-sm cursor-pointer select-none p-space-xs hover:bg-surface-container rounded-lg transition-colors">
                 <input type="checkbox" checked={targetNotion} onChange={(e) => setTargetNotion(e.target.checked)} className="mt-1 rounded-md accent-primary h-4 w-4" />
                 <div className="flex flex-col">
-                  <span className="font-body-md text-body-md text-on-surface font-semibold">Sync to Notion Execution Matrix</span>
-                  <span className="font-body-sm text-body-sm text-outline">Database: Q3 Deliverables Hub / Roadmap</span>
+                  <span className="font-body-md text-body-md text-on-surface font-semibold">Include in Notion export</span>
+                  <span className="font-body-sm text-body-sm text-outline">Added to the copy-ready Notion table.</span>
                 </div>
               </label>
             </div>

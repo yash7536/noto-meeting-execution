@@ -213,7 +213,7 @@ export default function NewMeetingPage() {
                 }
               >
                 <Icon name="upload_file" className="text-base" />
-                <span>Upload File (.vtt, .txt, .m4a, .mp3)</span>
+                <span>Upload Transcript (.vtt, .txt)</span>
               </button>
             </div>
             <div className="flex items-center gap-space-md">
@@ -264,9 +264,9 @@ export default function NewMeetingPage() {
               >
                 <Icon name="cloud_upload" className={`text-4xl ${dragActive ? "text-primary" : "text-outline"}`} />
                 <span className="font-headline-sm text-headline-sm text-on-surface">
-                  {dragActive ? "Drop to load transcript" : "Drop a .vtt, .txt, .m4a or .mp3 file"}
+                  {dragActive ? "Drop to load transcript" : "Drop a .vtt or .txt transcript file"}
                 </span>
-                <span className="font-body-sm text-body-sm text-on-surface-variant">Audio/VTT auto-transcription is not wired in this demo — paste text instead.</span>
+                <span className="font-body-sm text-body-sm text-on-surface-variant">Audio is not transcribed in this demo — paste or upload transcript text.</span>
                 <input
                   type="file"
                   accept=".vtt,.txt"
@@ -307,7 +307,7 @@ export default function NewMeetingPage() {
                   onClick={() => setTranscript(text)}
                   className="px-space-sm py-space-2xs bg-surface-container-lowest hover:bg-surface-container text-on-surface-variant hover:text-on-surface active:scale-[0.96] rounded font-label-sm text-label-sm transition-all shadow-sm capitalize"
                 >
-                  {key === "meet" ? "Google Meet" : key === "zoom" ? "Zoom Audio" : "Slack Huddle"}
+                  {key === "meet" ? "Google Meet" : key === "zoom" ? "Zoom" : "Slack Huddle"}
                 </button>
               ))}
             </div>

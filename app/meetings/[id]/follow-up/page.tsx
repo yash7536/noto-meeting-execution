@@ -294,10 +294,10 @@ export default function FollowUpPage() {
                     <span className="w-3 h-3 rounded-full bg-outline-variant" />
                     <span className="w-3 h-3 rounded-full bg-outline-variant" />
                     <span className="w-3 h-3 rounded-full bg-outline-variant" />
-                    <span className="font-mono-code text-mono-code text-outline ml-space-xs">Outbox Preview</span>
+                    <span className="font-mono-code text-mono-code text-outline ml-space-xs">Email Preview</span>
                   </div>
                   <span className="font-label-sm text-label-sm px-space-xs py-space-2xs bg-tertiary-container text-on-tertiary-container rounded uppercase font-semibold">
-                    {approved.length > 0 ? "Ready to dispatch" : "Awaiting approvals"}
+                    {approved.length > 0 ? "Ready to copy" : "Awaiting approvals"}
                   </span>
                 </div>
                 <div className="flex flex-col gap-space-2xs pt-space-xs">
@@ -373,7 +373,7 @@ export default function FollowUpPage() {
                   <span>{copiedKey === "markdown" ? "Copied!" : "Export as Markdown"}</span>
                 </button>
                 <button
-                  onClick={() => showToast(`Test copy dispatched to ${config.to}.`)}
+                  onClick={() => showToast("Sending requires a connected mail provider — not wired in this demo.")}
                   className="inline-flex items-center gap-space-xs px-space-md py-space-xs bg-surface-container-lowest hover:bg-surface-container text-on-surface font-label-md text-label-md rounded shadow-xs active:scale-[0.97] transition-all"
                 >
                   <Icon name="mark_email_read" className="text-sm text-outline" />

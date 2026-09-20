@@ -10,7 +10,7 @@ import { formatShortDate } from "@/lib/format";
 
 const STEPS = [
   {
-    title: "Reading transcript & speaker diarization",
+    title: "Reading transcript & speaker labels",
     detail: (words: number, speakers: number) => `${words} words parsed • ${speakers} participants identified`,
   },
   {
@@ -341,7 +341,7 @@ export default function ProcessingPage() {
               <div className="flex items-center justify-between">
                 <span className="font-label-sm text-label-sm text-outline uppercase font-semibold tracking-wider">Grounding Inspector</span>
                 <span className="font-mono-code text-mono-code text-on-surface-variant">
-                  {meeting.participants.length} / {meeting.participants.length} Speakers Diarized
+                  {meeting.participants.length} / {meeting.participants.length} Speakers Identified
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-space-xs">
