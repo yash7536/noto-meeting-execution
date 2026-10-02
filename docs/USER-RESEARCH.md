@@ -29,7 +29,7 @@ Directional testing with the 8 users surfaced three failure modes. Each is handl
 | 2 | Preference treated as a decision | Preference and deferral detection demote the item to an open question | 3 |
 | 3 | Conflicting options turned into a decision | Conflicting options are preserved as a conflict for human review instead of being picked | 5 |
 
-Of these, only the preference-vs-decision failure (#2) is documented as one the frozen 18-transcript benchmark did not catch; that benchmark was not rerun after the fix.
+The frozen 18-transcript benchmark was not rerun after the preference-vs-decision fix.
 
 ## Findings
 
