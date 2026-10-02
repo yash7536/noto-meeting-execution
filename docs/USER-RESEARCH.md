@@ -19,6 +19,18 @@ Testers weren't given a rigid script. The instruction was, in spirit:
 
 > Use the app normally. Paste a transcript, review what it produces, and tell me anything that's wrong, missing, confusing, or unnecessary.
 
+## Three failure modes this testing caught
+
+Directional testing with the 8 users surfaced three failure modes. Each is handled by deterministic validation rather than by trusting the model, and is covered by the regression suite (**41/41 passing** — a targeted regression result, not an F1 score):
+
+| # | Failure mode | Deterministic validation | Finding |
+|---|---|---|---|
+| 1 | Wrong owner identified | Owner grounding is checked in code; unsupported or ambiguous owners surface as "unclear owner" with candidates preserved | 1 |
+| 2 | Preference treated as a decision | Preference and deferral detection demote the item to an open question | 3 |
+| 3 | Conflicting options turned into a decision | Conflicting options are preserved as a conflict for human review instead of being picked | 5 |
+
+Of these, only the preference-vs-decision failure (#2) is documented as one the frozen 18-transcript benchmark did not catch; that benchmark was not rerun after the fix.
+
 ## Findings
 
 Organized as **Observation → Impact → Product response**.
@@ -28,30 +40,25 @@ Organized as **Observation → Impact → Product response**.
 **Impact:** a wrong owner in an execution plan is exactly the failure mode the whole product is designed to prevent — it's worse than no owner at all, because it looks confident.
 **Product response:** this is the case for why owner grounding is checked deterministically rather than trusted from the model directly (see `docs/AI-SYSTEM-DESIGN.md`); it's also why "unclear owner" is a first-class review state instead of the system always picking someone.
 
-### 2. One unresolved question wasn't surfaced clearly enough
-**Observation:** a tester didn't immediately notice that an open question still needed their input.
-**Impact:** if a reviewer misses a flagged item, the review step doesn't do its job.
-**Product response:** this remains a known UX gap rather than a claimed fix — noted here rather than hidden. It's a legitimate candidate for future review-workspace polish (clearer visual priority for unresolved items), not something I'm claiming is solved.
-
-### 3. The system conservatively avoided assigning an uncertain person rather than inventing ownership
+### 2. The system conservatively avoided assigning an uncertain person rather than inventing ownership
 **Observation:** when ownership genuinely wasn't clear from the transcript, Noto surfaced it as ambiguous instead of guessing.
 **Impact:** this is the design working as intended — confirms that "surface uncertainty rather than guess" holds up under real use, not just in my own testing.
 **Product response:** none needed; recorded here as validation of an existing guardrail, not a bug.
 
-### 4. Preference vs. decision was initially mishandled — the most important finding
+### 3. Preference vs. decision was initially mishandled — the most important finding
 **Observation:** in a test meeting about scheduling, one person's preference and another's conflicting preference — with a third person explicitly saying to test both before deciding — got extracted as a finalized decision.
 **Impact:** this directly violates the core promise of the product ("don't invent information that wasn't actually agreed"). It's the single most important thing this testing round found.
 **Product response:** a full guardrail fix — see `docs/PRODUCT-DECISIONS.md` and the failure story below.
 
-### 5. Explicit deferral ("pending legal approval") was correctly recognized as not-yet-decided
+### 4. Explicit deferral ("pending legal approval") was correctly recognized as not-yet-decided
 **Observation:** when a statement explicitly deferred a decision pending another condition, the system correctly held it as unresolved rather than treating the discussion as final.
 **Impact:** confirms the deferral-detection guardrail generalizes past the specific case that motivated it.
 **Product response:** none needed; recorded as validation.
 
-### 6. Conflicting options should not be automatically turned into a decision
-**Observation:** the general pattern behind finding #4 — when people propose different options and the room doesn't converge, the system shouldn't pick one and call it settled.
+### 5. Conflicting options should not be automatically turned into a decision
+**Observation:** the general pattern behind finding #3 — when people propose different options and the room doesn't converge, the system shouldn't pick one and call it settled.
 **Impact:** reinforced that conflict detection and preference-vs-decision detection are closely related guardrails, not one bug — both come from the same underlying principle.
-**Product response:** covered by the same guardrail work as #4.
+**Product response:** covered by the same guardrail work as #3.
 
 ## The critical failure, in detail
 

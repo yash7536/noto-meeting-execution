@@ -167,6 +167,8 @@ Worth being precise about the methodology: this wasn't 8 independently-designed 
 
 That testing is what surfaced the preference-vs-decision bug described above, which led to the guardrail fix, the regression test suite, and a targeted retest of the original failure cases.
 
+Directional testing surfaced three failure modes in total — wrong owner identification, a preference treated as a decision, and conflicting options turned into a decision. Each is handled with deterministic validation and covered by the regression suite (41/41 passing, a targeted regression result rather than an F1 score).
+
 ## Business Value
 
 I'm not going to invent a measured ROI number for a portfolio project tested by 8 people. What I can say honestly is where the value is supposed to come from:
